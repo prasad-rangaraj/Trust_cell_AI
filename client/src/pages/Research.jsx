@@ -66,8 +66,8 @@ export default function Research({ data, history }) {
             <LineChart data={trendData}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
               <XAxis dataKey="timestamp" stroke="var(--text-4)" fontSize={12} tickMargin={10} />
-              <YAxis yAxisId="left" stroke="var(--text-4)" fontSize={12} tickFormatter={(val) => \`\${val}%\`} />
-              <YAxis yAxisId="right" orientation="right" stroke="var(--text-4)" fontSize={12} tickFormatter={(val) => \`\${val}°C\`} />
+              <YAxis yAxisId="left" stroke="var(--text-4)" fontSize={12} tickFormatter={(val) => `${val}%`} />
+              <YAxis yAxisId="right" orientation="right" stroke="var(--text-4)" fontSize={12} tickFormatter={(val) => `${val}°C`} />
               <Tooltip 
                 contentStyle={{ background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: '8px', color: 'var(--text)' }}
                 itemStyle={{ color: 'var(--text-2)' }}
