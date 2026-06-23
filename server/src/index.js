@@ -121,20 +121,24 @@ mqttClient.on('message', async (topic, message) => {
         }
       }
 
-      try {
-        await prisma.batteryReading.create({ data });
+      // ── Only persist critical events (Warning / Critical) ──────────────
+      // Healthy readings flow over WebSocket but are never written to DB.
+      // battery_readings = full snapshot of the critical moment
+      // fault_logs       = status transition history
+      const isCriticalEvent = data.status !== 'Healthy';
 
-        if (data.status !== 'Healthy' || data.anomalyScore > 20) {
-          await prisma.anomalyLog.create({
-            data: {
-              anomalyScore: data.anomalyScore,
-              status: data.status,
-              details: `HW Message | Score: ${data.anomalyScore}% | Temp: ${data.temperature}°C | Gas: ${data.gas}ppm`,
-            },
-          });
+      if (isCriticalEvent) {
+        try {
+          await prisma.batteryReading.create({ data });
+          console.log(`[DB] Critical snapshot saved → ${data.status} | Score: ${data.anomalyScore}% | Temp: ${data.temperature}°C`);
+        } catch (err) {
+          console.warn(`[DB] Write failed: ${err.message}`);
         }
+      }
 
-        if (data.status !== lastStatus) {
+      // Log every status transition regardless of direction
+      if (data.status !== lastStatus) {
+        try {
           await prisma.faultLog.create({
             data: {
               faultType: 'Status Change (HW)',
@@ -147,18 +151,11 @@ mqttClient.on('message', async (topic, message) => {
               value: `Score: ${data.anomalyScore.toFixed(1)}%`,
             },
           });
-          lastStatus = data.status;
+          console.log(`[DB] Status transition: ${lastStatus} → ${data.status}`);
+        } catch (err) {
+          console.warn(`[DB] Fault log failed: ${err.message}`);
         }
-
-        const count = await prisma.batteryReading.count();
-        if (count > 1000) {
-          const oldest = await prisma.batteryReading.findFirst({ orderBy: { timestamp: 'asc' } });
-          if (oldest) await prisma.batteryReading.delete({ where: { id: oldest.id } });
-        }
-      } catch (err) {
-        if (process.env.NODE_ENV !== 'production') {
-          console.warn(`[DB] Write skipped: ${err.message}`);
-        }
+        lastStatus = data.status;
       }
 
       io.emit('battery:update', data);

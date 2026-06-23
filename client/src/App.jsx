@@ -10,6 +10,7 @@ import FaultReports from './pages/FaultReports';
 import LiveStream from './pages/LiveStream';
 import SystemConfig from './pages/SystemConfig';
 import Research from './pages/Research';
+import DigitalTwin from './pages/DigitalTwin';
 
 const DEMO_DATA = {
   cell1: 4.01, cell2: 4.02, cell3: 3.98, cell4: 4.00,
@@ -48,6 +49,7 @@ export default function App() {
       <Layout data={data} connected={connected} toasts={toasts}>
         <Routes>
           <Route path="/"         element={<Dashboard    {...pageProps} />} />
+          <Route path="/twin"     element={<DigitalTwin  {...pageProps} />} />
           <Route path="/cells"    element={<CellAnalytics {...pageProps} />} />
           <Route path="/sensors"  element={<SensorMonitor {...pageProps} />} />
           <Route path="/ai"       element={<AIInsights    {...pageProps} />} />

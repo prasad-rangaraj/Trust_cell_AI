@@ -1,11 +1,12 @@
 import { NavLink, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard, Battery, Cpu, BrainCircuit,
-  AlertTriangle, Settings, Radio, ChevronRight, Zap, Beaker
+  AlertTriangle, Settings, Radio, ChevronRight, Zap, Beaker, Box
 } from 'lucide-react';
 
 const NAV_ITEMS = [
   { label: 'Dashboard',      path: '/',         icon: LayoutDashboard },
+  { label: 'Digital Twin',   path: '/twin',     icon: Box },
   { label: 'Cell Analytics', path: '/cells',    icon: Battery },
   { label: 'Sensor Monitor', path: '/sensors',  icon: Cpu },
   { label: 'AI Insights',    path: '/ai',       icon: BrainCircuit },

@@ -88,10 +88,10 @@
   --text-4:      #64748b;
 
   /* ── Brand ── */
-  --yellow:      #10b981; 
-  --yellow-bg:   rgba(16, 185, 129, 0.1);
-  --yellow-border: rgba(16, 185, 129, 0.3);
-  --yellow-text: #34d399;
+  --yellow:      #f59e0b; 
+  --yellow-bg:   rgba(245, 158, 11, 0.1);
+  --yellow-border: rgba(245, 158, 11, 0.3);
+  --yellow-text: #fcd34d;
 
   /* ── Status Colors ── */
   --green:       #10b981;
@@ -537,4 +537,41 @@ html, body, #root {
 .prose ol { padding-left: 1.5em; margin-bottom: 0.75em; list-style-type: decimal; }
 .prose strong { font-weight: 700; color: #fff; }
 .prose code { background: rgba(0,0,0,0.3); padding: 0.2em 0.4em; border-radius: 4px; font-family: var(--mono); font-size: 0.9em; }
+
+/* ═══════════════════════════════════════════════════════
+   Digital Twin Animations & Utilities
+   ═══════════════════════════════════════════════════════ */
+@keyframes spin-fan {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+.animate-spin-slow { animation: spin-fan 6s linear infinite; }
+.animate-spin-medium { animation: spin-fan 1.5s linear infinite; }
+.animate-spin-fast { animation: spin-fan 0.3s linear infinite; }
+
+@keyframes current-flow {
+  0% { stroke-dashoffset: 24; }
+  100% { stroke-dashoffset: 0; }
+}
+.current-line-flow {
+  stroke-dasharray: 8, 4;
+  animation: current-flow 1.2s linear infinite;
+}
+
+@keyframes float-smoke {
+  0% { transform: translateY(0) scale(0.8); opacity: 0; }
+  25% { opacity: 0.45; }
+  100% { transform: translateY(-35px) scale(1.4); opacity: 0; }
+}
+.smoke-particle {
+  animation: float-smoke 1.8s ease-out infinite;
+}
+
+@keyframes bounce-relay {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-2px); }
+}
+.relay-blade-active {
+  animation: bounce-relay 1s ease-in-out infinite;
+}
 

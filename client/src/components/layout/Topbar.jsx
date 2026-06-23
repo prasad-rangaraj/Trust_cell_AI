@@ -4,6 +4,7 @@ import { Bell, Clock, Wifi, WifiOff, Sun, Moon } from 'lucide-react';
 
 const PAGE_TITLES = {
   '/':        { title: 'Dashboard',      sub: 'Real-time battery system overview' },
+  '/twin':    { title: 'BMS Digital Twin', sub: 'Interactive 3D pack visualization & live simulation' },
   '/cells':   { title: 'Cell Analytics', sub: 'Individual cell voltage monitoring & analysis' },
   '/sensors': { title: 'Sensor Monitor', sub: 'Current, temperature & gas sensor data' },
   '/ai':      { title: 'AI Insights',    sub: 'TinyML anomaly detection analytics' },

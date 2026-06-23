@@ -33,7 +33,7 @@ model AnomalyLog {
   timestamp    DateTime @default(now())
   anomalyScore Float
   status       String
-  details      String?
+  details      String
 
   @@map("anomaly_logs")
 }
