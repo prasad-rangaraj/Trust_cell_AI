@@ -27,7 +27,7 @@ export default function Header({ connected, status }) {
         </div>
         <div>
           <div className="flex items-center gap-2">
-            <span className="text-xl font-bold gradient-text tracking-tight">Think360 Edge</span>
+            <span className="text-xl font-bold gradient-text tracking-tight">Edge Sense</span>
             <span
               className="text-[10px] font-semibold px-2 py-0.5 rounded-full"
               style={{ background: 'rgba(245,200,66,0.12)', color: '#f5c842', border: '1px solid rgba(245,200,66,0.25)' }}
@@ -50,7 +50,7 @@ export default function Header({ connected, status }) {
           className="text-sm font-bold tracking-wide uppercase px-3 py-1 rounded-lg"
           style={{ background: 'rgba(245,200,66,0.08)', color: '#f5c842', border: '1px solid rgba(245,200,66,0.2)' }}
         >
-          🐛 Caterpillar Finale 2026
+           
         </span>
       </div>
 

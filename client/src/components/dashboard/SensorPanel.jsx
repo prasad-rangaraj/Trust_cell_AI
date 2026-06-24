@@ -35,7 +35,7 @@ function ArcGauge({ value, min, max, color, unit, size = 96 }) {
         fill="none" stroke={color} strokeWidth={sw} strokeLinecap="round"
       />
       <text x={cx} y={cy - 2} textAnchor="middle" fill={color} fontSize={16} fontWeight="900" fontFamily="'JetBrains Mono', monospace">
-        {typeof value === 'number' ? value.toFixed(value > 100 ? 0 : 1) : value}
+        {typeof value === 'number' ? value.toFixed(value < 10 ? 2 : value > 100 ? 0 : 1) : value}
       </text>
       <text x={cx} y={cy + 12} textAnchor="middle" fill="var(--text-4)" fontSize={9} fontWeight="600">{unit}</text>
     </svg>
@@ -91,7 +91,7 @@ function SensorCard({ icon: Icon, label, value, unit, min, max, color, sub, hist
 }
 
 export default function SensorPanel({ data, history }) {
-  const gas      = data?.gas ?? 120;
+  const gas      = data?.gas ?? 0;
   const gasColor = gas > 500 ? 'var(--red)' : gas > 250 ? 'var(--amber)' : 'var(--green)';
   const gasLevel = gas > 500 ? 'HIGH' : gas > 250 ? 'ELEVATED' : 'NORMAL';
   const chartData = history.map((h, i) => ({ i, v: h.gas ?? 0 }));
@@ -125,8 +125,8 @@ export default function SensorPanel({ data, history }) {
           </div>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
             <AnimatePresence mode="wait">
-              <motion.span key={Math.round(gas)} initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ fontSize: 26, fontWeight: 900, fontFamily: 'var(--mono)', color: gasColor }}>
-                {Math.round(gas)}
+              <motion.span key={gas.toFixed(2)} initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ fontSize: 26, fontWeight: 900, fontFamily: 'var(--mono)', color: gasColor }}>
+                {gas.toFixed(2)}
               </motion.span>
             </AnimatePresence>
             <span style={{ fontSize: 12, color: 'var(--text-3)' }}>ppm</span>

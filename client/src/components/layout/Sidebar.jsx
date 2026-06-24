@@ -36,7 +36,7 @@ export default function Sidebar({ data }) {
           </div>
           <div>
             <div style={{ fontWeight: 800, fontSize: 15, color: 'var(--text)', lineHeight: 1.2 }}>
-              Think360 Edge
+              Edge Sense
             </div>
             <div style={{ fontSize: 10, color: 'var(--text-4)', fontWeight: 500, letterSpacing: '0.04em' }}>
               BATTERY PLATFORM
@@ -95,10 +95,10 @@ export default function Sidebar({ data }) {
       {/* Footer */}
       <div style={{ padding: '12px 16px', borderTop: '1px solid var(--border)' }}>
         <div style={{ fontSize: 10, color: 'var(--text-4)', textAlign: 'center' }}>
-          🐛 Caterpillar Finale 2026
+           
         </div>
         <div style={{ fontSize: 10, color: 'var(--text-4)', textAlign: 'center', marginTop: 2 }}>
-          v2.0.0 · Think360 Edge
+          v2.0.0 · Edge Sense
         </div>
       </div>
     </aside>

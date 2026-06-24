@@ -1,76 +1,109 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { LineChart, Line, ResponsiveContainer, YAxis } from 'recharts';
+import { LineChart, Line, ResponsiveContainer, YAxis, BarChart, Bar, XAxis, Tooltip, CartesianGrid } from 'recharts';
 import SafetyBanner from '../components/dashboard/SafetyBanner';
 import BatteryHealthCard from '../components/dashboard/BatteryHealthCard';
-import CellVoltageGrid from '../components/dashboard/CellVoltageGrid';
-import SensorPanel from '../components/dashboard/SensorPanel';
 import AIStatusCard from '../components/dashboard/AIStatusCard';
 import ProtectionStatus from '../components/dashboard/ProtectionStatus';
-import EventLog from '../components/dashboard/EventLog';
-import DemoPanel from '../components/dashboard/DemoPanel';
-import { Activity, Battery, Cpu, Brain } from 'lucide-react';
+import { Activity, Battery, Cpu, Brain, Zap, AlertTriangle, CheckCircle, Clock, TrendingUp, Radio } from 'lucide-react';
 
-const containerVariants = {
-  hidden: { opacity: 0 },
-  show: {
-    opacity: 1,
-    transition: { staggerChildren: 0.08 }
-  }
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
-  show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 24 } }
-};
+const iV = { hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 300, damping: 24 } } };
+const cV = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.08 } } };
 
 function MiniStat({ label, value, sub, color = 'var(--text)', icon: Icon, historyData, dataKey }) {
   const isDanger = color === 'var(--red)' || color === 'var(--amber)';
-  
   return (
-    <motion.div 
-      variants={itemVariants}
-      className="bento-item" 
-      style={{ padding: '20px', gap: '12px', justifyContent: 'space-between', borderTop: `2px solid ${color}` }}
-    >
+    <motion.div variants={iV} className="bento-item" style={{ padding: 20, gap: 12, justifyContent: 'space-between', borderTop: `3px solid ${color}` }}>
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
         <div>
           <span className="stat-label" style={{ color: 'var(--text-3)', letterSpacing: '0.05em' }}>{label}</span>
-          <div className="stat-value" style={{ color: 'var(--text)', fontSize: 36, marginTop: '4px', textShadow: isDanger ? `0 0 12px color-mix(in srgb, ${color} 40%, transparent)` : 'none' }}>{value}</div>
-          {sub && <div className="stat-sub" style={{ color: color !== 'var(--text)' ? color : 'var(--text-4)', fontWeight: 600, marginTop: '2px' }}>{sub}</div>}
+          <div className="stat-value" style={{ color: 'var(--text)', fontSize: 36, marginTop: 4, textShadow: isDanger ? `0 0 12px color-mix(in srgb, ${color} 40%, transparent)` : 'none' }}>{value}</div>
+          {sub && <div className="stat-sub" style={{ color: color !== 'var(--text)' ? color : 'var(--text-4)', fontWeight: 600, marginTop: 2 }}>{sub}</div>}
         </div>
         {Icon && (
-          <div style={{ 
-            background: `color-mix(in srgb, ${color} 15%, transparent)`,
-            padding: '10px', 
-            borderRadius: '12px',
-            boxShadow: `0 0 20px color-mix(in srgb, ${color} 20%, transparent)`
-          }}>
+          <div style={{ background: `color-mix(in srgb, ${color} 15%, transparent)`, padding: 10, borderRadius: 12, boxShadow: `0 0 20px color-mix(in srgb, ${color} 20%, transparent)` }}>
             <Icon size={24} color={color} />
           </div>
         )}
       </div>
-      <div style={{ flex: 1, display: 'flex', alignItems: 'flex-end', minHeight: '40px', marginTop: '10px' }}>
+      <div style={{ flex: 1, minHeight: 40, marginTop: 10 }}>
         {historyData && dataKey && (
-          <div style={{ width: '100%', height: '100%' }}>
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={historyData}>
-                <YAxis domain={['dataMin - 1', 'dataMax + 1']} hide />
-                <Line 
-                  type="monotone" 
-                  dataKey={dataKey} 
-                  stroke={color} 
-                  strokeWidth={3} 
-                  dot={false} 
-                  isAnimationActive={true}
-                  style={{ filter: `drop-shadow(0px 4px 6px color-mix(in srgb, ${color} 40%, transparent))` }}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
+          <ResponsiveContainer width="100%" height={40}>
+            <LineChart data={historyData}>
+              <YAxis domain={['dataMin - 1', 'dataMax + 1']} hide />
+              <Line type="monotone" dataKey={dataKey} stroke={color} strokeWidth={3} dot={false} style={{ filter: `drop-shadow(0px 4px 6px color-mix(in srgb, ${color} 40%, transparent))` }} />
+            </LineChart>
+          </ResponsiveContainer>
         )}
       </div>
     </motion.div>
+  );
+}
+
+// 24h Operations Summary — time spent in each state
+function OperationsSummary({ history }) {
+  const counts = history.reduce((acc, h) => {
+    const s = h.status ?? 'Healthy';
+    acc[s] = (acc[s] ?? 0) + 1;
+    return acc;
+  }, {});
+  const total = history.length || 1;
+  const states = [
+    { label: 'Healthy', color: 'var(--green)', pct: Math.round(((counts.Healthy ?? 0) / total) * 100) },
+    { label: 'Warning', color: 'var(--amber)', pct: Math.round(((counts.Warning ?? 0) / total) * 100) },
+    { label: 'Critical', color: 'var(--red)',   pct: Math.round(((counts.Critical ?? 0) / total) * 100) },
+  ];
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+      <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: 1 }}>Session State Distribution</div>
+      <div style={{ display: 'flex', height: 14, borderRadius: 99, overflow: 'hidden', gap: 2 }}>
+        {states.map(s => s.pct > 0 && (
+          <div key={s.label} style={{ flex: s.pct, background: s.color, transition: 'flex 0.5s ease' }} title={`${s.label}: ${s.pct}%`} />
+        ))}
+      </div>
+      <div style={{ display: 'flex', gap: 16, marginTop: 4 }}>
+        {states.map(s => (
+          <div key={s.label} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <div style={{ width: 8, height: 8, borderRadius: '50%', background: s.color }} />
+            <span style={{ fontSize: 11, color: 'var(--text-3)', fontWeight: 600 }}>{s.label} <span style={{ color: s.color, fontWeight: 800 }}>{s.pct}%</span></span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// Notification-style alert feed
+function AlertFeed({ faults }) {
+  const icons = { Critical: AlertTriangle, Warning: Zap, Healthy: CheckCircle };
+  const colors = { Critical: 'var(--red)', Warning: 'var(--amber)', Healthy: 'var(--green)' };
+  const recent = faults.slice(0, 8);
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      {recent.length === 0 && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: 16, background: 'var(--surface-2)', borderRadius: 8, border: '1px solid var(--border)' }}>
+          <CheckCircle size={18} color="var(--green)" />
+          <span style={{ fontSize: 13, color: 'var(--text-3)', fontWeight: 600 }}>No recent fault events — system nominal.</span>
+        </div>
+      )}
+      {recent.map((f, i) => {
+        const Icon = icons[f.severity] ?? AlertTriangle;
+        const color = colors[f.severity] ?? 'var(--text-3)';
+        return (
+          <motion.div key={i} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.04 }}
+            style={{ display: 'flex', alignItems: 'flex-start', gap: 12, padding: '10px 14px', background: 'var(--surface-2)', borderRadius: 8, border: `1px solid var(--border)`, borderLeft: `3px solid ${color}` }}>
+            <Icon size={16} color={color} style={{ flexShrink: 0, marginTop: 2 }} />
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{f.faultType}</div>
+              <div style={{ fontSize: 11, color: 'var(--text-4)', marginTop: 2 }}>{f.actionTaken}</div>
+            </div>
+            <span style={{ fontSize: 10, color: 'var(--text-4)', flexShrink: 0, fontFamily: 'var(--mono)' }}>
+              {new Date(f.timestamp).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}
+            </span>
+          </motion.div>
+        );
+      })}
+    </div>
   );
 }
 
@@ -79,81 +112,89 @@ export default function Dashboard({ data, history }) {
 
   useEffect(() => {
     fetch('/api/faults').then(r => r.json()).then(d => d.success && setFaults(d.data)).catch(() => {});
+    const t = setInterval(() => {
+      fetch('/api/faults').then(r => r.json()).then(d => d.success && setFaults(d.data)).catch(() => {});
+    }, 10000);
+    return () => clearInterval(t);
   }, []);
 
-  const onScenarioChange = () => {
-    setTimeout(() => {
-      fetch('/api/faults').then(r => r.json()).then(d => d.success && setFaults(d.data)).catch(() => {});
-    }, 500);
-  };
-
   const statusColor = data?.status === 'Healthy' ? 'var(--green)' : data?.status === 'Warning' ? 'var(--amber)' : 'var(--red)';
-
-  // Format history for sparklines
-  const sparkData = history.slice(-30).map(h => ({
-    health: h.batteryHealth,
-    voltage: (h.cell1 + h.cell2 + h.cell3 + h.cell4),
-    temp: Math.max(h.temp1 ?? 0, h.temp2 ?? 0),
-    ai: h.anomalyScore
-  }));
+  const sparkData = history.slice(-30).map(h => ({ health: h.batteryHealth, voltage: (h.cell1 + h.cell2 + h.cell3 + h.cell4), temp: Math.max(h.temp1 ?? 0, h.temp2 ?? 0), ai: h.anomalyScore }));
 
   return (
-    <motion.div 
-      initial={{ opacity: 0 }} 
-      animate={{ opacity: 1 }} 
-      transition={{ duration: 0.4 }}
-      style={{ display: 'flex', flexDirection: 'column', gap: 24 }}
-    >
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4 }} style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
       <SafetyBanner data={data} />
 
-      <motion.div 
-        variants={containerVariants}
-        initial="hidden"
-        animate="show"
-        className="bento-grid"
-      >
-        {/* Row 1: KPI Cards */}
+      <motion.div variants={cV} initial="hidden" animate="show" className="bento-grid">
+        {/* KPI Panel Row 1 */}
         <div className="bento-col-3" style={{ display: 'flex', flexDirection: 'column' }}>
-          <MiniStat label="Battery Health" value={`${data?.batteryHealth?.toFixed(1) ?? '--'}%`} sub="State of Health" color={statusColor} icon={Battery} historyData={sparkData} dataKey="health" />
+          <MiniStat label="Battery Health (SoH)" value={`${data?.soh?.toFixed(1) ?? '--'}%`} sub={`Active Cells: ${data?.activeCells ?? 4}/4`} color={statusColor} icon={Battery} historyData={sparkData} dataKey="health" />
         </div>
         <div className="bento-col-3" style={{ display: 'flex', flexDirection: 'column' }}>
-          <MiniStat label="Pack Voltage" value={`${((data?.cell1 ?? 4) + (data?.cell2 ?? 4) + (data?.cell3 ?? 4) + (data?.cell4 ?? 4)).toFixed(2)}V`} sub="4S Li-ion" icon={Activity} historyData={sparkData} dataKey="voltage" color="var(--blue)" />
+          <MiniStat label="State of Charge (SoC)" value={`${(data?.soc ?? 100).toFixed(1)}%`} sub={`Status: ${data?.chargeStatus ?? 'Idle'}`} icon={Activity} historyData={sparkData} dataKey="voltage" color="var(--blue)" />
         </div>
         <div className="bento-col-3" style={{ display: 'flex', flexDirection: 'column' }}>
-          <MiniStat label="Max Temp" value={`${Math.max(data?.temp1 ?? 0, data?.temp2 ?? 0).toFixed(1)}°C`} sub={Math.max(data?.temp1 ?? 0, data?.temp2 ?? 0) > 55 ? '⚠ High' : 'Normal'} color={Math.max(data?.temp1 ?? 0, data?.temp2 ?? 0) > 55 ? 'var(--amber)' : 'var(--purple)'} icon={Cpu} historyData={sparkData} dataKey="temp" />
+          <MiniStat label="Diagnostic (ML Op)" value={data?.mlOp ?? 'NORMAL'} sub={data?.spn ? `J1939: SPN ${data.spn} FMI ${data.fmi}` : 'No fault codes'} color={data?.spn ? 'var(--red)' : 'var(--purple)'} icon={Cpu} historyData={sparkData} dataKey="temp" />
         </div>
         <div className="bento-col-3" style={{ display: 'flex', flexDirection: 'column' }}>
-          <MiniStat label="AI Score" value={`${data?.anomalyScore?.toFixed(1) ?? '--'}%`} sub={data?.status ?? 'Healthy'} color={statusColor} icon={Brain} historyData={sparkData} dataKey="ai" />
+          <MiniStat label="Battery Score" value={`${(data?.batteryScore ?? 100.0).toFixed(1)}%`} sub={data?.status ?? 'Healthy'} color={statusColor} icon={Brain} historyData={sparkData} dataKey="ai" />
         </div>
 
-        {/* Row 2: Main metrics */}
-        <motion.div variants={itemVariants} className="bento-col-5" style={{ display: 'flex', flexDirection: 'column', minHeight: 420 }}>
+        {/* Row 2: Main Charts */}
+        <motion.div variants={iV} className="bento-col-5" style={{ display: 'flex', flexDirection: 'column', minHeight: 420 }}>
           <BatteryHealthCard data={data} history={history} style={{ flex: 1, width: '100%' }} />
         </motion.div>
-        <motion.div variants={itemVariants} className="bento-col-4" style={{ display: 'flex', flexDirection: 'column', minHeight: 420 }}>
+        <motion.div variants={iV} className="bento-col-4" style={{ display: 'flex', flexDirection: 'column', minHeight: 420 }}>
           <AIStatusCard data={data} history={history} style={{ flex: 1, width: '100%' }} />
         </motion.div>
-        <motion.div variants={itemVariants} className="bento-col-3" style={{ display: 'flex', flexDirection: 'column', minHeight: 420 }}>
+        <motion.div variants={iV} className="bento-col-3" style={{ display: 'flex', flexDirection: 'column', minHeight: 420 }}>
           <ProtectionStatus data={data} style={{ flex: 1, width: '100%' }} />
         </motion.div>
 
-        {/* Row 3: Cells */}
-        <motion.div variants={itemVariants} className="bento-col-12" style={{ display: 'flex', flexDirection: 'column' }}>
-          <CellVoltageGrid data={data} history={history} style={{ flex: 1, width: '100%' }} />
+        {/* Row 3: Operations Summary + Alert Feed — UNIQUE to Dashboard */}
+        <motion.div variants={iV} className="bento-col-4" style={{ display: 'flex', flexDirection: 'column' }}>
+          <div className="card" style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 0 }}>
+            <div className="card-header">
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <Clock size={15} color="var(--yellow)" />
+                <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)' }}>Operations Summary</span>
+              </div>
+              <span className="badge badge-yellow"><Radio size={10} /> LIVE SESSION</span>
+            </div>
+            <div className="card-body" style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+              <OperationsSummary history={history} />
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                {[
+                  { label: 'Packets Received', val: history.length, color: 'var(--blue)' },
+                  { label: 'Relay State', val: data?.relay === 'CONNECTED' ? 'CLOSED' : 'OPEN', color: data?.relay === 'CONNECTED' ? 'var(--green)' : 'var(--red)' },
+                  { label: 'Current Load', val: `${(data?.current ?? 0).toFixed(2)} A`, color: 'var(--text-2)' },
+                  { label: 'Pack SoC', val: `${data?.soc ?? Math.round(((Math.max(data?.cell1??0,data?.cell2??0,data?.cell3??0,data?.cell4??0)-3.0)/(4.12-3.0))*100) ?? '--'}%`, color: 'var(--yellow)' },
+                ].map(({ label, val, color }) => (
+                  <div key={label} style={{ background: 'var(--surface-2)', padding: '10px 14px', borderRadius: 8, border: '1px solid var(--border)' }}>
+                    <div style={{ fontSize: 10, color: 'var(--text-4)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1 }}>{label}</div>
+                    <div style={{ fontSize: 16, fontWeight: 800, color, fontFamily: 'var(--mono)', marginTop: 4 }}>{val}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
         </motion.div>
 
-        {/* Row 4: Sensors */}
-        <motion.div variants={itemVariants} className="bento-col-12" style={{ display: 'flex', flexDirection: 'column' }}>
-          <SensorPanel data={data} history={history} style={{ flex: 1, width: '100%' }} />
+        <motion.div variants={iV} className="bento-col-8" style={{ display: 'flex', flexDirection: 'column' }}>
+          <div className="card" style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 0 }}>
+            <div className="card-header">
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <AlertTriangle size={15} color="var(--amber)" />
+                <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)' }}>Live Alert Feed</span>
+              </div>
+              <span className="badge badge-gray">{faults.length} total events</span>
+            </div>
+            <div className="card-body" style={{ overflowY: 'auto', maxHeight: 320 }}>
+              <AlertFeed faults={faults} />
+            </div>
+          </div>
         </motion.div>
 
-        {/* Row 4: Logs & Demo */}
-        <motion.div variants={itemVariants} className="bento-col-8" style={{ display: 'flex', flexDirection: 'column', minHeight: 340 }}>
-          <EventLog faults={faults} data={data} style={{ flex: 1, width: '100%' }} />
-        </motion.div>
-        <motion.div variants={itemVariants} className="bento-col-4" style={{ display: 'flex', flexDirection: 'column', minHeight: 340 }}>
-          <DemoPanel onScenarioChange={onScenarioChange} style={{ flex: 1, width: '100%' }} />
-        </motion.div>
       </motion.div>
     </motion.div>
   );

@@ -7,8 +7,9 @@ import mqtt from 'mqtt';
 
 import apiRoutes from './routes/index.js';
 import errorHandler from './middleware/errorHandler.js';
-import { generateReading } from './simulator.js';
+
 import prisma from './services/prisma.service.js';
+import { simulatedRelays } from './simulator.js';
 
 
 // ─── App Setup ────────────────────────────────────────────────
@@ -30,6 +31,12 @@ app.use(express.json());
 // ─── API Routes ───────────────────────────────────────────────
 app.use('/api', apiRoutes);
 
+// ─── Expose MQTT client to route controllers ──────────────────
+// mqttClient is defined further below but Node module caching
+// means app.get('mqttClient') will resolve at request-time,
+// after mqttClient is initialised.
+// We set it after the mqtt.connect() call instead (see below).
+
 // ─── 404 Handler ──────────────────────────────────────────────
 app.use((req, res) => {
   res.status(404).json({ success: false, error: `Route not found: ${req.method} ${req.path}` });
@@ -50,9 +57,13 @@ const MQTT_TOPIC_TERM = 'battery/terminal';
 
 let lastStatus = 'Healthy';
 let lastMqttTimestamp = 0;
+let lastTerminalData = { temp1: 0, temp2: 0, vibration: 0, co: 0 };
 
 console.log(`[MQTT] Connecting to broker: ${MQTT_BROKER}`);
 const mqttClient = mqtt.connect(MQTT_BROKER);
+
+// ← Attach after construction so controllers can publish commands
+app.set('mqttClient', mqttClient);
 
 mqttClient.on('connect', () => {
   console.log(`[MQTT] Connected to broker. Subscribing to topics: ${MQTT_TOPIC_LIVE}, ${MQTT_TOPIC_TERM}`);
@@ -65,6 +76,16 @@ mqttClient.on('message', async (topic, message) => {
 
     if (topic === MQTT_TOPIC_TERM) {
       console.log(`[MQTT TERMINAL] ${msgStr}`);
+      const t1Match = msgStr.match(/T1:\s*([\d.]+)C/);
+      const t2Match = msgStr.match(/T2:\s*([\d.]+)C/);
+      const vibMatch = msgStr.match(/VIB:\s*([\d.]+)G/);
+      const coMatch = msgStr.match(/CO:\s*([\d.]+)PPM/);
+      
+      if (t1Match) lastTerminalData.temp1 = parseFloat(t1Match[1]);
+      if (t2Match) lastTerminalData.temp2 = parseFloat(t2Match[1]);
+      if (vibMatch) lastTerminalData.vibration = parseFloat(vibMatch[1]);
+      if (coMatch) lastTerminalData.co = parseFloat(coMatch[1]);
+
       io.emit('terminal:log', msgStr);
       return;
     }
@@ -80,14 +101,28 @@ mqttClient.on('message', async (topic, message) => {
         cell3: parseFloat(rawData.cell3 ?? 0),
         cell4: parseFloat(rawData.cell4 ?? 0),
         current: parseFloat(rawData.current ?? 0),
-        temp1: parseFloat(rawData.temp1 ?? 0),
-        temp2: parseFloat(rawData.temp2 ?? 0),
-        gas: parseFloat(rawData.gas ?? 0),
-        vibration: parseFloat(rawData.vibration ?? 0.5),
+        temp1: parseFloat(rawData.temp1 ?? (lastTerminalData.temp1 || rawData.temperature || 0)),
+        temp2: parseFloat(rawData.temp2 ?? (lastTerminalData.temp2 || rawData.temperature || 0)),
+        gas: parseFloat(rawData.gas ?? (lastTerminalData.co || 0)),
+        vibration: parseFloat(rawData.vibration ?? (lastTerminalData.vibration || 0)),
         batteryHealth: parseFloat(rawData.batteryHealth ?? 100),
         anomalyScore: parseFloat(rawData.anomalyScore ?? 0),
         status: rawData.status || 'Healthy',
         relay: rawData.relay || 'CONNECTED',
+        spn: rawData.spn !== undefined ? parseInt(rawData.spn) : null,
+        fmi: rawData.fmi !== undefined ? parseInt(rawData.fmi) : null,
+        activeCells: rawData.activeCells !== undefined ? parseInt(rawData.activeCells) : 4,
+        soc: rawData.soc !== undefined ? parseFloat(rawData.soc) : 100,
+        soh: rawData.soh !== undefined ? parseFloat(rawData.soh) : 100,
+        chargeStatus: rawData.chargeStatus || 'Idle',
+        mlOp: rawData.mlOp || 'NORMAL',
+        batteryScore: rawData.batteryScore !== undefined ? parseFloat(rawData.batteryScore) : 100,
+        relayCooling: rawData.relayCooling || simulatedRelays.cooling,
+        relayIsolation: rawData.relayIsolation || simulatedRelays.isolation,
+        relayCell1: rawData.relayCell1 || simulatedRelays.cell1,
+        relayCell2: rawData.relayCell2 || simulatedRelays.cell2,
+        relayCell3: rawData.relayCell3 || simulatedRelays.cell3,
+        relayCell4: rawData.relayCell4 || simulatedRelays.cell4,
       };
 
       // Calculate health & anomaly locally if not provided
@@ -168,68 +203,16 @@ mqttClient.on('message', async (topic, message) => {
   }
 });
 
-// ─── Simulation Loop (Fallback) ──────────────────────────────
-async function simulationTick() {
-  // If we received an MQTT reading within the last 10 seconds, skip the simulator
-  if (Date.now() - lastMqttTimestamp < 10000) {
-    return;
-  }
 
-  const data = generateReading();
-
-  try {
-    await prisma.batteryReading.create({ data });
-
-    if (data.status !== 'Healthy' || data.anomalyScore > 20) {
-      await prisma.anomalyLog.create({
-        data: {
-          anomalyScore: data.anomalyScore,
-          status: data.status,
-          details: `Score: ${data.anomalyScore}% | Max Temp: ${Math.max(data.temp1, data.temp2)}°C | Gas: ${data.gas}ppm`,
-        },
-      });
-    }
-
-    if (data.status !== lastStatus) {
-      await prisma.faultLog.create({
-        data: {
-          faultType: 'Status Change',
-          severity: data.status,
-          actionTaken: data.status === 'Critical'
-            ? 'CRITICAL: Relay action taken'
-            : data.status === 'Warning'
-              ? 'AI Warning — monitoring elevated'
-              : 'System returned to normal',
-          value: `Score: ${data.anomalyScore.toFixed(1)}%`,
-        },
-      });
-      lastStatus = data.status;
-    }
-
-    const count = await prisma.batteryReading.count();
-    if (count > 1000) {
-      const oldest = await prisma.batteryReading.findFirst({ orderBy: { timestamp: 'asc' } });
-      if (oldest) await prisma.batteryReading.delete({ where: { id: oldest.id } });
-    }
-  } catch (err) {
-    if (process.env.NODE_ENV !== 'production') {
-      console.warn(`[DB] Write skipped: ${err.message}`);
-    }
-  }
-
-  io.emit('battery:update', data);
-}
 
 // ─── Start ────────────────────────────────────────────────────
 const PORT = process.env.PORT || 3001;
 
 httpServer.listen(PORT, () => {
   console.log('\n╔══════════════════════════════════════╗');
-  console.log('║  Think360 Edge Server v2.0           ║');
+  console.log('║  CAT® Edge Server v2.0               ║');
   console.log(`║  HTTP  → http://localhost:${PORT}       ║`);
   console.log('║  WS    → Socket.io ready             ║');
   console.log('╚══════════════════════════════════════╝\n');
 
-  setInterval(simulationTick, 2000);
-  simulationTick();
 });

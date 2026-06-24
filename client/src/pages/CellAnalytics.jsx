@@ -3,8 +3,8 @@ import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { Battery, TrendingUp, TrendingDown, Info, Zap, Thermometer, ShieldCheck, Activity, Cpu } from 'lucide-react';
 import { motion } from 'framer-motion';
 
-const CELL_COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6'];
-const CELL_GLOWS = ['rgba(59,130,246,0.4)', 'rgba(16,185,129,0.4)', 'rgba(245,158,11,0.4)', 'rgba(139,92,246,0.4)'];
+const CELL_COLORS = ['#FFCC00', '#FFCC00', '#FFCC00', '#FFCC00'];
+const CELL_GLOWS = ['rgba(255,204,0,0.4)', 'rgba(255,204,0,0.4)', 'rgba(255,204,0,0.4)', 'rgba(255,204,0,0.4)'];
 
 export default function CellAnalytics({ data, history }) {
   const [apiHistory, setApiHistory] = useState([]);
@@ -20,12 +20,12 @@ export default function CellAnalytics({ data, history }) {
     c1: h.cell1, c2: h.cell2, c3: h.cell3, c4: h.cell4,
   }));
 
-  const voltages = [data?.cell1, data?.cell2, data?.cell3, data?.cell4].map(v => v ?? 4.0);
+  const voltages = [data?.cell1, data?.cell2, data?.cell3, data?.cell4].map(v => v ?? 0);
   const avgVoltage = voltages.reduce((a,b)=>a+b,0)/4;
   const spread = (Math.max(...voltages) - Math.min(...voltages)).toFixed(3);
 
   // Derive temperatures based on temp1 (front pair) and temp2 (rear pair)
-  const cellTemps = [data?.temp1 ?? 34, data?.temp1 ?? 34, data?.temp2 ?? 33, data?.temp2 ?? 33];
+  const cellTemps = [data?.temperature ?? data?.temp1 ?? 0, data?.temperature ?? data?.temp1 ?? 0, data?.temperature ?? data?.temp2 ?? 0, data?.temperature ?? data?.temp2 ?? 0];
 
   const cellStats = voltages.map((v, i) => {
     const vals = chartData.map(d => d[`c${i+1}`]).filter(Boolean);
@@ -92,7 +92,7 @@ export default function CellAnalytics({ data, history }) {
                 background: isSelected ? 'var(--surface)' : 'var(--surface-2)',
                 border: `1px solid ${isSelected ? cColor : 'var(--border)'}`,
                 boxShadow: isSelected ? `0 10px 30px ${CELL_GLOWS[i]}` : 'var(--shadow-sm)',
-                borderRadius: 20, padding: 20, cursor: 'pointer', position: 'relative', overflow: 'hidden',
+                borderRadius: 8, padding: 20, cursor: 'pointer', position: 'relative', overflow: 'hidden',
                 transition: 'border 0.3s'
               }}
             >

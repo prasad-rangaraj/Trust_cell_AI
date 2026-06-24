@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Bell, Clock, Wifi, WifiOff, Sun, Moon } from 'lucide-react';
+import { Bell, Clock, Wifi, WifiOff } from 'lucide-react';
 
 const PAGE_TITLES = {
   '/':        { title: 'Dashboard',      sub: 'Real-time battery system overview' },
@@ -17,14 +17,7 @@ const PAGE_TITLES = {
 export default function Topbar({ connected, data }) {
   const [time, setTime] = useState(new Date());
   const location = useLocation();
-  const meta = PAGE_TITLES[location.pathname] || { title: 'Think360 Edge', sub: '' };
-
-  const [theme, setTheme] = useState(localStorage.getItem('theme') || 'dark');
-
-  useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme);
-    localStorage.setItem('theme', theme);
-  }, [theme]);
+  const meta = PAGE_TITLES[location.pathname] || { title: 'Edge Sense', sub: '' };
 
   useEffect(() => {
     const t = setInterval(() => setTime(new Date()), 1000);
@@ -44,18 +37,6 @@ export default function Topbar({ connected, data }) {
 
       {/* Right: controls */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-        {/* Theme Toggle */}
-        <button
-          onClick={() => setTheme(t => t === 'dark' ? 'light' : 'dark')}
-          className="btn btn-ghost"
-          style={{ padding: '6px', borderRadius: '50%' }}
-          title="Toggle Theme"
-        >
-          {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
-        </button>
-
-        {/* Divider */}
-        <div style={{ width: 1, height: 20, background: 'var(--border)' }} />
 
         {/* Clock */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'var(--text-3)' }}>

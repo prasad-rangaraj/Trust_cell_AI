@@ -12,18 +12,13 @@ import SystemConfig from './pages/SystemConfig';
 import Research from './pages/Research';
 import DigitalTwin from './pages/DigitalTwin';
 
-const DEMO_DATA = {
-  cell1: 4.01, cell2: 4.02, cell3: 3.98, cell4: 4.00,
-  current: 2.1, temp1: 34.2, temp2: 33.8, gas: 120,
-  batteryHealth: 96.2, anomalyScore: 4,
-  status: 'Healthy', relay: 'CONNECTED',
-};
+
 
 export default function App() {
   const { data: liveData, connected, history, terminalLogs } = useSocket();
   const [toasts, setToasts] = useState([]);
 
-  const data = liveData || DEMO_DATA;
+  const data = liveData;
 
   function addToast(toast) {
     const id = Date.now();
@@ -41,7 +36,7 @@ export default function App() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [liveData?.status]);
 
-  const pageProps = { data, history, terminalLogs };
+  const pageProps = { data, history, terminalLogs, connected };
 
 
   return (

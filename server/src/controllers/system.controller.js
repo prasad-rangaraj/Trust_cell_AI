@@ -1,6 +1,6 @@
 import asyncHandler from '../middleware/asyncHandler.js';
 import prisma from '../services/prisma.service.js';
-import { getCurrentScenario } from '../simulator.js';
+import { updateSimulatedRelay } from '../simulator.js';
 
 /**
  * GET /api/system/health
@@ -25,7 +25,7 @@ export const getSystemHealth = asyncHandler(async (req, res) => {
       uptime: Math.floor(process.uptime()),
       db: dbStatus,
       dbLatency: `${dbLatency}ms`,
-      scenario: getCurrentScenario(),
+
       timestamp: new Date().toISOString(),
       version: '2.0.0',
     },
@@ -54,7 +54,7 @@ export const exportData = asyncHandler(async (req, res) => {
     const csv = [headers.join(','), ...rows].join('\n');
 
     res.setHeader('Content-Type', 'text/csv');
-    res.setHeader('Content-Disposition', `attachment; filename="think360_export_${Date.now()}.csv"`);
+    res.setHeader('Content-Disposition', `attachment; filename="cat_edge_export_${Date.now()}.csv"`);
     return res.send(csv);
   }
 
@@ -80,8 +80,55 @@ export const getSystemStats = asyncHandler(async (req, res) => {
       totalFaults,
       totalAnomalies,
       uptime: Math.floor(process.uptime()),
-      scenario: getCurrentScenario(),
+
       latest: latestReading,
     },
+  });
+});
+
+/**
+ * POST /api/system/relay
+ * Body: { relay: 'isolation'|'cooling'|'cell1'|'cell2'|'cell3'|'cell4', action: 'CONNECT'|'DISCONNECT' }
+ * Publishes a relay control command over MQTT to the STM32 hardware.
+ */
+export const controlRelay = asyncHandler(async (req, res) => {
+  const VALID_RELAYS  = ['isolation', 'cooling', 'cell1', 'cell2', 'cell3', 'cell4'];
+  const VALID_ACTIONS = ['CONNECT', 'DISCONNECT'];
+
+  const { relay, action } = req.body;
+
+  if (!relay || !action) {
+    return res.status(400).json({ success: false, error: 'Missing relay or action in request body.' });
+  }
+  if (!VALID_RELAYS.includes(relay)) {
+    return res.status(400).json({ success: false, error: `Invalid relay. Must be one of: ${VALID_RELAYS.join(', ')}` });
+  }
+  if (!VALID_ACTIONS.includes(action)) {
+    return res.status(400).json({ success: false, error: `Invalid action. Must be CONNECT or DISCONNECT.` });
+  }
+
+  // Build the ASCII command expected by the STM32 firmware
+  // e.g. "RELAY:COOLING:ON"  or  "RELAY:CELL1:OFF"
+  const relayCode = relay.toUpperCase();
+  const stateCode = action === 'CONNECT' ? 'ON' : 'OFF';
+  const commandStr = `RELAY:${relayCode}:${stateCode}`;
+
+  // Update backend simulator state
+  updateSimulatedRelay(relay, action);
+
+  // Publish to hardware via the shared MQTT client
+  const mqttClient = req.app.get('mqttClient');
+  if (mqttClient && mqttClient.connected) {
+    mqttClient.publish('battery/control', commandStr, { qos: 1 });
+    console.log(`[RELAY] MQTT publish → battery/control | ${commandStr}`);
+  } else {
+    console.warn(`[RELAY] MQTT not connected — command NOT dispatched: ${commandStr}`);
+  }
+
+  res.json({
+    success: true,
+    message: `Relay command dispatched: ${commandStr}`,
+    relay,
+    action,
   });
 });

@@ -25,7 +25,23 @@ model BatteryReading {
   anomalyScore  Float
   vibration     Float    @default(0)
   status        String   @default("Healthy")
-  relay         String   @default("CONNECTED")
+  relay         String   @default("CONNECTED") // Keep for legacy compatibility
+  
+  // --- NEW FIELDS ---
+  spn             Int?
+  fmi             Int?
+  activeCells     Int      @default(4)
+  soc             Float    @default(100.0)
+  soh             Float    @default(100.0)
+  chargeStatus    String   @default("Idle")      // "Idle" | "Charging" | "Discharging"
+  mlOp            String   @default("NORMAL")    // Machine learning diagnosed class string
+  batteryScore    Float    @default(100.0)       // Calculated safety score / status index
+  relayCooling    String   @default("DISCONNECTED")
+  relayIsolation  String   @default("CONNECTED")
+  relayCell1      String   @default("CONNECTED")
+  relayCell2      String   @default("CONNECTED")
+  relayCell3      String   @default("CONNECTED")
+  relayCell4      String   @default("CONNECTED")
 
   @@map("battery_readings")
 }

@@ -31,7 +31,7 @@ function BatteryVisual({ pct, color }) {
 }
 
 export default function BatteryHealthCard({ data, history }) {
-  const pct   = data?.batteryHealth ?? 96;
+  const pct   = data?.batteryHealth ?? 0;
   const color = pct >= 80 ? 'var(--green)' : pct >= 60 ? 'var(--amber)' : 'var(--red)';
   const label = pct >= 80 ? 'Healthy' : pct >= 60 ? 'Degraded' : 'Critical';
   const cls   = pct >= 80 ? 'badge-green' : pct >= 60 ? 'badge-amber' : 'badge-red';

@@ -16,7 +16,7 @@ function CellCard({ label, voltage, index, history }) {
   const status = isImbalanced ? 'Imbalanced' : isLow ? 'Low' : 'Normal';
   const cls    = isImbalanced ? 'badge-red' : isLow ? 'badge-amber' : 'badge-green';
 
-  const fillPct   = Math.max(0, Math.min(100, ((voltage - 3.0) / 1.2) * 100));
+  const fillPct   = Math.max(0, Math.min(100, ((voltage - 3.0) / 1.12) * 100));
   const chartData = history.map((h, i) => ({ i, v: h[`cell${index + 1}`] ?? 0 }));
 
   return (
@@ -43,32 +43,32 @@ function CellCard({ label, voltage, index, history }) {
         <span className={`badge ${cls}`} style={{ fontSize: 9 }}>{status}</span>
       </div>
 
-      <div style={{ display: 'flex', alignItems: 'baseline', gap: 3 }}>
-        <AnimatePresence mode="wait">
-          <motion.span
-            key={voltage?.toFixed(2)}
-            initial={{ opacity: 0, y: -4 }}
-            animate={{ opacity: 1, y: 0 }}
-            style={{ fontSize: 26, fontWeight: 900, fontFamily: 'var(--mono)', color, lineHeight: 1 }}
-          >
-            {voltage?.toFixed(2)}
-          </motion.span>
-        </AnimatePresence>
-        <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-3)' }}>V</span>
-      </div>
-
-      <div>
-        <div className="progress-track">
-          <motion.div
-            className="progress-fill"
-            animate={{ width: `${fillPct}%` }}
-            transition={{ duration: 0.8 }}
-            style={{ background: color }}
-          />
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 10 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: 3 }}>
+            <AnimatePresence mode="wait">
+              <motion.span
+                key={voltage?.toFixed(2)}
+                initial={{ opacity: 0, y: -4 }}
+                animate={{ opacity: 1, y: 0 }}
+                style={{ fontSize: 26, fontWeight: 900, fontFamily: 'var(--mono)', color, lineHeight: 1 }}
+              >
+                {voltage?.toFixed(2)}
+              </motion.span>
+            </AnimatePresence>
+            <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-3)' }}>V</span>
+          </div>
+          <div style={{ fontSize: 10, color: 'var(--text-4)', fontFamily: 'var(--mono)' }}>Min: 3.0V / Max: 4.12V</div>
         </div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 3 }}>
-          <span style={{ fontSize: 9, color: 'var(--text-4)', fontFamily: 'var(--mono)' }}>3.0V</span>
-          <span style={{ fontSize: 9, color: 'var(--text-4)', fontFamily: 'var(--mono)' }}>4.2V</span>
+
+        {/* Liquid Battery Indicator */}
+        <div className="liquid-battery-shell">
+          <div className="liquid-battery-nub" />
+          <div className="liquid-battery-body" style={{ background: color }}>
+            <div className="liquid-battery-wave" style={{ background: bg, top: `${100 - fillPct}%` }} />
+            <div className="liquid-battery-wave layer2" style={{ top: `${100 - fillPct}%` }} />
+            <div className="liquid-battery-pct">{Math.round(fillPct)}%</div>
+          </div>
         </div>
       </div>
 
@@ -92,7 +92,7 @@ function CellCard({ label, voltage, index, history }) {
 }
 
 export default function CellVoltageGrid({ data, history }) {
-  const cells    = [data?.cell1, data?.cell2, data?.cell3, data?.cell4].map((v, i) => ({ label: `C${i+1}`, voltage: v ?? 4.0, index: i }));
+  const cells    = [data?.cell1, data?.cell2, data?.cell3, data?.cell4].map((v, i) => ({ label: `C${i+1}`, voltage: v ?? 0, index: i }));
   const voltages = cells.map(c => c.voltage);
   const spread   = (Math.max(...voltages) - Math.min(...voltages)).toFixed(3);
   const packV    = voltages.reduce((a, b) => a + b, 0).toFixed(2);
@@ -148,7 +148,7 @@ export default function CellVoltageGrid({ data, history }) {
           </div>
           <div>
             <div style={{ fontSize: 10, color: 'var(--text-4)' }}>Nominal</div>
-            <div style={{ fontFamily: 'var(--mono)', fontSize: 11, fontWeight: 600, color: 'var(--text-3)' }}>3.7 – 4.2V</div>
+            <div style={{ fontFamily: 'var(--mono)', fontSize: 11, fontWeight: 600, color: 'var(--text-3)' }}>3.7 – 4.12V</div>
           </div>
         </div>
       </div>

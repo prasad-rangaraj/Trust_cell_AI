@@ -2,11 +2,12 @@ import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MessageSquare, X, Send, Bot, User, Loader2 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 export default function ChatBot({ data }) {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([
-    { role: 'assistant', content: 'Hello! I am the Think360 Edge AI. How can I assist you with battery analytics today?' }
+    { role: 'assistant', content: 'Hello! I am theEdge Sense. How can I assist you with battery analytics today?' }
   ]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
@@ -110,7 +111,7 @@ export default function ChatBot({ data }) {
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <Bot size={20} color="var(--yellow)" />
-                <h3 style={{ margin: 0, fontSize: '15px', fontWeight: 600 }}>Think360 Edge AI</h3>
+                <h3 style={{ margin: 0, fontSize: '15px', fontWeight: 600 }}>Edge Sense</h3>
               </div>
               <button
                 onClick={() => setIsOpen(false)}
@@ -158,7 +159,7 @@ export default function ChatBot({ data }) {
                       msg.content
                     ) : (
                       <div className="prose prose-sm prose-invert" style={{ margin: 0 }}>
-                        <ReactMarkdown>{msg.content}</ReactMarkdown>
+                        <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.content}</ReactMarkdown>
                       </div>
                     )}
                   </div>
