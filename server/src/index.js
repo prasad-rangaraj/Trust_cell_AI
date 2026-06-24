@@ -1,4 +1,4 @@
-import 'dotenv/config'; // trigger nodemon restart
+import 'dotenv/config'; // trigger nodemon restart!
 import express from 'express';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
@@ -80,8 +80,10 @@ mqttClient.on('message', async (topic, message) => {
         cell3: parseFloat(rawData.cell3 ?? 0),
         cell4: parseFloat(rawData.cell4 ?? 0),
         current: parseFloat(rawData.current ?? 0),
-        temperature: parseFloat(rawData.temperature ?? 0),
+        temp1: parseFloat(rawData.temp1 ?? 0),
+        temp2: parseFloat(rawData.temp2 ?? 0),
         gas: parseFloat(rawData.gas ?? 0),
+        vibration: parseFloat(rawData.vibration ?? 0.5),
         batteryHealth: parseFloat(rawData.batteryHealth ?? 100),
         anomalyScore: parseFloat(rawData.anomalyScore ?? 0),
         status: rawData.status || 'Healthy',
@@ -96,14 +98,15 @@ mqttClient.on('message', async (topic, message) => {
         const imbalance = cellMax - cellMin;
         const voltagePct = Math.max(0, Math.min(100, ((avgCell - 3.0) / (4.2 - 3.0)) * 100));
         const imbalancePenalty = Math.max(0, Math.min(30, imbalance * 100));
-        const tempPenalty = data.temperature > 50 ? (data.temperature - 50) * 0.5 : 0;
+        const tempPenalty = (data.temp1 > 50 || data.temp2 > 50) ? (Math.max(data.temp1, data.temp2) - 50) * 0.5 : 0;
         data.batteryHealth = parseFloat(Math.max(0, Math.min(100, voltagePct - imbalancePenalty - tempPenalty)).toFixed(1));
       }
 
       if (rawData.anomalyScore === undefined) {
         let score = 0;
-        if (data.temperature > 45) score += (data.temperature - 45) * 2.5;
+        if (data.temp1 > 45 || data.temp2 > 45) score += (Math.max(data.temp1, data.temp2) - 45) * 2.5;
         if (data.gas > 150) score += (data.gas - 150) * 0.15;
+        if (data.vibration > 1.5) score += (data.vibration - 1.5) * 15;
         const cellMin = Math.min(data.cell1, data.cell2, data.cell3, data.cell4);
         const cellMax = Math.max(data.cell1, data.cell2, data.cell3, data.cell4);
         const imbalance = cellMax - cellMin;
@@ -112,9 +115,9 @@ mqttClient.on('message', async (topic, message) => {
       }
 
       if (!rawData.status) {
-        if (data.anomalyScore > 50 || data.temperature > 60 || data.gas > 400) {
+        if (data.anomalyScore > 50 || data.temp1 > 60 || data.temp2 > 60 || data.gas > 400 || data.vibration > 3.0) {
           data.status = 'Critical';
-        } else if (data.anomalyScore > 15 || data.temperature > 45 || data.gas > 200) {
+        } else if (data.anomalyScore > 15 || data.temp1 > 45 || data.temp2 > 45 || data.gas > 200 || data.vibration > 1.5) {
           data.status = 'Warning';
         } else {
           data.status = 'Healthy';
@@ -130,7 +133,7 @@ mqttClient.on('message', async (topic, message) => {
       if (isCriticalEvent) {
         try {
           await prisma.batteryReading.create({ data });
-          console.log(`[DB] Critical snapshot saved → ${data.status} | Score: ${data.anomalyScore}% | Temp: ${data.temperature}°C`);
+          console.log(`[DB] Critical snapshot saved → ${data.status} | Score: ${data.anomalyScore}% | Max Temp: ${Math.max(data.temp1, data.temp2)}°C`);
         } catch (err) {
           console.warn(`[DB] Write failed: ${err.message}`);
         }
@@ -182,7 +185,7 @@ async function simulationTick() {
         data: {
           anomalyScore: data.anomalyScore,
           status: data.status,
-          details: `Score: ${data.anomalyScore}% | Temp: ${data.temperature}°C | Gas: ${data.gas}ppm`,
+          details: `Score: ${data.anomalyScore}% | Max Temp: ${Math.max(data.temp1, data.temp2)}°C | Gas: ${data.gas}ppm`,
         },
       });
     }

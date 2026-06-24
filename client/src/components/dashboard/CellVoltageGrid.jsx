@@ -73,7 +73,7 @@ function CellCard({ label, voltage, index, history }) {
       </div>
 
       {chartData.length > 3 && (
-        <div style={{ height: 26 }}>
+        <div style={{ height: 48, marginTop: 'auto' }}>
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={chartData} margin={{ top: 0, right: 0, bottom: 0, left: 0 }}>
               <defs>
@@ -99,7 +99,7 @@ export default function CellVoltageGrid({ data, history }) {
   const avgV     = (voltages.reduce((a, b) => a + b, 0) / 4).toFixed(3);
 
   return (
-    <div className="card" style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+    <div className="card" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
       <div className="card-header">
         <div>
           <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-2)' }}>Cell Voltage Monitor</div>
@@ -120,8 +120,8 @@ export default function CellVoltageGrid({ data, history }) {
         </div>
       </div>
 
-      <div className="card-body" style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 16 }}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10 }}>
+      <div className="card-body" style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 24, justifyContent: 'center' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 }}>
           {cells.map((cell) => (
             <CellCard key={cell.label} {...cell} history={history} />
           ))}

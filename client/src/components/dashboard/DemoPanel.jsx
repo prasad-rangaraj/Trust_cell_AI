@@ -33,7 +33,7 @@ export default function DemoPanel({ onScenarioChange }) {
   }
 
   return (
-    <div className="card" style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+    <div className="card" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
       <div className="card-header">
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <Beaker size={16} color="var(--yellow)" />

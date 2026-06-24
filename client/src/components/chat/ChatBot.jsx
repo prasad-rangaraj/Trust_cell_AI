@@ -30,7 +30,7 @@ export default function ChatBot({ data }) {
     setIsTyping(true);
 
     try {
-      const response = await fetch('http://localhost:3001/api/chat', {
+      const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -44,7 +44,7 @@ export default function ChatBot({ data }) {
       if (resData.success) {
         setMessages(prev => [...prev, resData.data]);
       } else {
-        setMessages(prev => [...prev, { role: 'assistant', content: 'Sorry, I encountered an error. Please try again.' }]);
+        setMessages(prev => [...prev, { role: 'assistant', content: `Sorry, an error occurred: ${resData.error || 'Unknown error'}. Did you restart the backend server after the API key was added?` }]);
       }
     } catch (error) {
       console.error(error);

@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { Zap, Thermometer, Wind } from 'lucide-react';
+import { Zap, Thermometer, Wind, Activity } from 'lucide-react';
 import { AreaChart, Area, ResponsiveContainer } from 'recharts';
 
 function ArcGauge({ value, min, max, color, unit, size = 96 }) {
@@ -97,14 +97,16 @@ export default function SensorPanel({ data, history }) {
   const chartData = history.map((h, i) => ({ i, v: h.gas ?? 0 }));
 
   return (
-    <div className="card" style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+    <div className="card" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
       <div className="card-header">
         <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-2)' }}>Sensor Monitoring</div>
-        <span className="badge badge-gray">3 Sensors</span>
+        <span className="badge badge-gray">5 Sensors</span>
       </div>
-      <div className="card-body" style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 10 }}>
+      <div className="card-body" style={{ flex: 1, display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 16 }}>
         <SensorCard icon={Zap} label="Current" value={data?.current ?? 0} unit="A" min={0} max={20} color="var(--blue)" sub="Load Current" history={history} histKey="current" warnAt={10} critAt={15} />
-        <SensorCard icon={Thermometer} label="Temperature" value={data?.temperature ?? 0} unit="°C" min={0} max={100} color="var(--amber)" sub="Pack Temperature" history={history} histKey="temperature" warnAt={55} critAt={65} />
+        <SensorCard icon={Thermometer} label="Temp 1" value={data?.temp1 ?? 0} unit="°C" min={0} max={100} color="var(--amber)" sub="Sensor 1" history={history} histKey="temp1" warnAt={55} critAt={65} />
+        <SensorCard icon={Thermometer} label="Temp 2" value={data?.temp2 ?? 0} unit="°C" min={0} max={100} color="var(--amber)" sub="Sensor 2" history={history} histKey="temp2" warnAt={55} critAt={65} />
+        <SensorCard icon={Activity} label="Vibration" value={data?.vibration ?? 0} unit="g" min={0} max={5} color="var(--yellow)" sub="Chassis Vibration" history={history} histKey="vibration" warnAt={1.5} critAt={3.0} />
 
         {/* Gas - custom */}
         <div style={{

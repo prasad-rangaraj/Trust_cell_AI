@@ -43,7 +43,7 @@ export default function BatteryHealthCard({ data, history }) {
   return (
     <motion.div
       className="card animate-in"
-      style={{ height: '100%', display: 'flex', flexDirection: 'column' }}
+      style={{ flex: 1, display: 'flex', flexDirection: 'column' }}
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.04 }}
@@ -92,7 +92,7 @@ export default function BatteryHealthCard({ data, history }) {
         </div>
 
         {chartData.length > 3 && (
-          <div style={{ height: 48 }}>
+          <div style={{ flex: 1, minHeight: 48, display: 'flex', flexDirection: 'column' }}>
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={chartData} margin={{ top: 2, right: 0, bottom: 0, left: 0 }}>
                 <defs>

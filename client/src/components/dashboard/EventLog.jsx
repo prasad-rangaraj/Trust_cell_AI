@@ -17,7 +17,7 @@ function timeAgo(ts) {
 
 export default function EventLog({ faults, data }) {
   return (
-    <div className="card" style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+    <div className="card" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
       <div className="card-header">
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <ClipboardList size={16} color="var(--yellow)" />

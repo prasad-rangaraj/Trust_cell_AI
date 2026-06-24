@@ -14,7 +14,7 @@ import DigitalTwin from './pages/DigitalTwin';
 
 const DEMO_DATA = {
   cell1: 4.01, cell2: 4.02, cell3: 3.98, cell4: 4.00,
-  current: 2.1, temperature: 34, gas: 120,
+  current: 2.1, temp1: 34.2, temp2: 33.8, gas: 120,
   batteryHealth: 96.2, anomalyScore: 4,
   status: 'Healthy', relay: 'CONNECTED',
 };

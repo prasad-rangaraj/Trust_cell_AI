@@ -48,12 +48,12 @@ export const getReadingStats = asyncHandler(async (req, res) => {
     take: limit,
     select: {
       cell1: true, cell2: true, cell3: true, cell4: true,
-      current: true, temperature: true, gas: true,
+      current: true, temp1: true, temp2: true, gas: true,
       batteryHealth: true, anomalyScore: true,
     },
   });
 
-  const fields = ['cell1', 'cell2', 'cell3', 'cell4', 'current', 'temperature', 'gas', 'batteryHealth', 'anomalyScore'];
+  const fields = ['cell1', 'cell2', 'cell3', 'cell4', 'current', 'temp1', 'temp2', 'gas', 'batteryHealth', 'anomalyScore'];
   const stats = {};
 
   for (const field of fields) {

@@ -18,10 +18,12 @@ model BatteryReading {
   cell3         Float
   cell4         Float
   current       Float
-  temperature   Float
+  temp1         Float    @default(0)
+  temp2         Float    @default(0)
   gas           Float
   batteryHealth Float
   anomalyScore  Float
+  vibration     Float    @default(0)
   status        String   @default("Healthy")
   relay         String   @default("CONNECTED")
 

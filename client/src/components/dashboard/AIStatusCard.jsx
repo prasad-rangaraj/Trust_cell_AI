@@ -51,7 +51,7 @@ export default function AIStatusCard({ data, history }) {
   return (
     <motion.div
       className="card animate-in"
-      style={{ height: '100%', display: 'flex', flexDirection: 'column' }}
+      style={{ flex: 1, display: 'flex', flexDirection: 'column' }}
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.08 }}
@@ -108,12 +108,12 @@ export default function AIStatusCard({ data, history }) {
         </div>
 
         {chartData.length > 3 && (
-          <div>
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
             <div style={{ fontSize: 11, color: 'var(--text-3)', marginBottom: 6, display: 'flex', alignItems: 'center', gap: 4 }}>
               <Activity size={11} />
               Anomaly Score History
             </div>
-            <div style={{ height: 42 }}>
+            <div style={{ flex: 1, minHeight: 42 }}>
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={chartData} margin={{ top: 0, right: 0, bottom: 0, left: 0 }}>
                   <defs>

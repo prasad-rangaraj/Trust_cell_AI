@@ -41,7 +41,7 @@ export default function ProtectionStatus({ data }) {
   return (
     <motion.div
       className="card animate-in"
-      style={{ height: '100%', display: 'flex', flexDirection: 'column' }}
+      style={{ flex: 1, display: 'flex', flexDirection: 'column' }}
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.12 }}
@@ -56,7 +56,7 @@ export default function ProtectionStatus({ data }) {
         </span>
       </div>
 
-      <div className="card-body" style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 10 }}>
+      <div className="card-body" style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 10, justifyContent: 'space-between' }}>
         <StatusRow
           icon={Power}
           label="Relay Status"
