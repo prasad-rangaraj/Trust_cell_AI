@@ -16,22 +16,22 @@ function HoloGlobe() {
 
   return (
     <group ref={globeRef} position={[15, 0, -10]}>
-      {/* Core dark sphere */}
+      {/* Core light sphere */}
       <mesh>
         <sphereGeometry args={[18, 64, 64]} />
-        <meshBasicMaterial color="#050505" />
+        <meshBasicMaterial color="#F1F5F9" />
       </mesh>
       
-      {/* Glowing yellow wireframe representing the digital grid */}
+      {/* Glowing blue wireframe representing the digital grid */}
       <mesh>
         <sphereGeometry args={[18.1, 32, 32]} />
-        <meshBasicMaterial color="#FFCC00" wireframe transparent opacity={0.15} />
+        <meshBasicMaterial color="#3253DC" wireframe transparent opacity={0.15} />
       </mesh>
 
       {/* Secondary intricate wireframe for technical depth */}
       <mesh>
         <icosahedronGeometry args={[18.5, 2]} />
-        <meshBasicMaterial color="#FFCC00" wireframe transparent opacity={0.08} />
+        <meshBasicMaterial color="#3253DC" wireframe transparent opacity={0.08} />
       </mesh>
     </group>
   );
@@ -69,7 +69,7 @@ function OrbitingNodes() {
       {nodes.map((n, i) => (
         <mesh key={i} position={[0, n.yPos, 0]}>
           <sphereGeometry args={[n.size, 8, 8]} />
-          <meshBasicMaterial color={i % 5 === 0 ? "#ff4444" : "#FFCC00"} />
+          <meshBasicMaterial color={i % 5 === 0 ? "#10B981" : "#3253DC"} />
         </mesh>
       ))}
     </group>
@@ -102,14 +102,14 @@ function DataStreams() {
       <bufferGeometry>
         <bufferAttribute attach="attributes-position" count={count} array={positions} itemSize={3} />
       </bufferGeometry>
-      <pointsMaterial size={0.4} color="#ffffff" transparent opacity={0.3} />
+      <pointsMaterial size={0.4} color="#3253AC" transparent opacity={0.3} />
     </points>
   );
 }
 
 export default function Background3D() {
   return (
-    <div style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none', background: '#0a0a0a' }}>
+    <div style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none', background: 'var(--bg)' }}>
       <Canvas camera={{ position: [0, 0, 30], fov: 50 }}>
         <ambientLight intensity={0.5} />
         
@@ -120,7 +120,7 @@ export default function Background3D() {
         <Environment preset="city" />
       </Canvas>
       {/* Very soft gradient to ensure UI readability */}
-      <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, rgba(10,10,10,0.9) 0%, rgba(10,10,10,0.4) 100%)' }} />
+      <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, rgba(248,250,252,0.9) 0%, rgba(248,250,252,0.4) 100%)' }} />
     </div>
   );
 }

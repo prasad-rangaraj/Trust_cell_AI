@@ -107,6 +107,32 @@ function AlertFeed({ faults }) {
   );
 }
 
+// Battery Cell visualization component (Ported from Mobile)
+function BatteryCell({ index, voltage, active }) {
+  const MIN_V = 2.8;
+  const MAX_V = 4.2;
+  const fillPct = active && voltage ? Math.max(0, Math.min(100, ((voltage - MIN_V) / (MAX_V - MIN_V)) * 100)) : 0;
+  const healthColor = !active ? 'var(--border)' : (voltage < 3.0 || voltage > 4.15) ? 'var(--red)' : (voltage < 3.2 || voltage > 4.1) ? 'var(--amber)' : 'var(--green)';
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '22%' }}>
+      <div style={{ width: 24, height: 6, background: active ? 'var(--border)' : 'var(--surface-3)', borderRadius: '3px 3px 0 0' }} />
+      <div style={{ 
+        width: '100%', height: 110, borderRadius: 6, border: `2px solid ${active ? 'var(--border)' : 'var(--surface-3)'}`,
+        display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', overflow: 'hidden', background: 'var(--surface-2)', position: 'relative'
+      }}>
+        <div style={{ width: '100%', height: `${fillPct}%`, background: healthColor, transition: 'height 1s ease, background 1s ease' }} />
+        <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.2)' }}>
+          <span style={{ fontSize: 14, fontWeight: 900, color: active ? '#fff' : 'var(--text-4)' }}>C{index}</span>
+          <span style={{ fontSize: 11, fontWeight: 700, color: active ? '#fff' : 'var(--text-4)' }}>
+            {active && voltage ? voltage.toFixed(2) : '0.00'}<span style={{ fontSize: 9 }}>V</span>
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function Dashboard({ data, history }) {
   const [faults, setFaults] = useState([]);
 
@@ -120,6 +146,28 @@ export default function Dashboard({ data, history }) {
 
   const statusColor = data?.status === 'Healthy' ? 'var(--green)' : data?.status === 'Warning' ? 'var(--amber)' : 'var(--red)';
   const sparkData = history.slice(-30).map(h => ({ health: h.batteryHealth, voltage: (h.cell1 + h.cell2 + h.cell3 + h.cell4), temp: Math.max(h.temp1 ?? 0, h.temp2 ?? 0), ai: h.anomalyScore }));
+
+  // Predictive Analytics
+  const currentLoad = data?.current ?? 0;
+  const currentSoc = data?.soc ?? 100;
+  let tteText = '--';
+  let tteLabel = 'Predictive TTE';
+  
+  if (Math.abs(currentLoad) < 0.1) {
+    tteText = 'N/A (Idle)';
+    tteLabel = 'Time Remaining';
+  } else if (currentLoad < 0) { // Discharging
+    const hoursToEmpty = (currentSoc / 100) * (100 / Math.abs(currentLoad)); // 100Ah pack assumption
+    tteText = `${hoursToEmpty.toFixed(1)} hrs`;
+    tteLabel = 'Time to Empty (TTE)';
+  } else { // Charging
+    const hoursToFull = ((100 - currentSoc) / 100) * (100 / currentLoad);
+    tteText = `${hoursToFull.toFixed(1)} hrs`;
+    tteLabel = 'Time to Full (TTF)';
+  }
+
+  const peakTemp = history.reduce((max, h) => Math.max(max, h.temp1 ?? 0, h.temp2 ?? 0), 0);
+  const peakLoad = history.reduce((max, h) => Math.max(max, Math.abs(h.current ?? 0)), 0);
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4 }} style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
@@ -151,7 +199,7 @@ export default function Dashboard({ data, history }) {
           <ProtectionStatus data={data} style={{ flex: 1, width: '100%' }} />
         </motion.div>
 
-        {/* Row 3: Operations Summary + Alert Feed — UNIQUE to Dashboard */}
+        {/* Row 3: Operations Summary + Alert Feed + Cell Diagnostics */}
         <motion.div variants={iV} className="bento-col-4" style={{ display: 'flex', flexDirection: 'column' }}>
           <div className="card" style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 0 }}>
             <div className="card-header">
@@ -169,6 +217,8 @@ export default function Dashboard({ data, history }) {
                   { label: 'Relay State', val: data?.relay === 'CONNECTED' ? 'CLOSED' : 'OPEN', color: data?.relay === 'CONNECTED' ? 'var(--green)' : 'var(--red)' },
                   { label: 'Current Load', val: `${(data?.current ?? 0).toFixed(2)} A`, color: 'var(--text-2)' },
                   { label: 'Pack SoC', val: `${data?.soc ?? Math.round(((Math.max(data?.cell1??0,data?.cell2??0,data?.cell3??0,data?.cell4??0)-3.0)/(4.12-3.0))*100) ?? '--'}%`, color: 'var(--yellow)' },
+                  { label: tteLabel, val: tteText, color: currentLoad > 0.1 ? 'var(--green)' : currentLoad < -0.1 ? 'var(--amber)' : 'var(--text-3)' },
+                  { label: 'Peak Temp', val: `${peakTemp.toFixed(1)} °C`, color: peakTemp > 45 ? 'var(--red)' : peakTemp > 35 ? 'var(--amber)' : 'var(--green)' },
                 ].map(({ label, val, color }) => (
                   <div key={label} style={{ background: 'var(--surface-2)', padding: '10px 14px', borderRadius: 8, border: '1px solid var(--border)' }}>
                     <div style={{ fontSize: 10, color: 'var(--text-4)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1 }}>{label}</div>
@@ -180,14 +230,35 @@ export default function Dashboard({ data, history }) {
           </div>
         </motion.div>
 
-        <motion.div variants={iV} className="bento-col-8" style={{ display: 'flex', flexDirection: 'column' }}>
+        <motion.div variants={iV} className="bento-col-4" style={{ display: 'flex', flexDirection: 'column' }}>
+          <div className="card" style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 0 }}>
+            <div className="card-header">
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <Battery size={15} color="var(--blue)" />
+                <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)' }}>Cell Diagnostics</span>
+              </div>
+            </div>
+            <div className="card-body" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', height: '100%', padding: '24px 20px' }}>
+              {[1, 2, 3, 4].map(i => (
+                <BatteryCell 
+                  key={i} 
+                  index={i} 
+                  voltage={data?.[`cell${i}`]} 
+                  active={(data?.activeCells ?? 4) >= i} 
+                />
+              ))}
+            </div>
+          </div>
+        </motion.div>
+
+        <motion.div variants={iV} className="bento-col-4" style={{ display: 'flex', flexDirection: 'column' }}>
           <div className="card" style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 0 }}>
             <div className="card-header">
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <AlertTriangle size={15} color="var(--amber)" />
                 <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)' }}>Live Alert Feed</span>
               </div>
-              <span className="badge badge-gray">{faults.length} total events</span>
+              <span className="badge badge-gray">{faults.length} events</span>
             </div>
             <div className="card-body" style={{ overflowY: 'auto', maxHeight: 320 }}>
               <AlertFeed faults={faults} />

@@ -6,60 +6,61 @@
    ═══════════════════════════════════════════════════════ */
 
 :root {
-  /* ── Surface & Backgrounds (CAT Dark Theme) ── */
-  --bg: #111111;
-  --bg-alt: #000000;
-  --surface: #1A1A1A;
-  --surface-2: #222222;
-  --surface-3: #2A2A2A;
+  /* ── Surface & Backgrounds (Qualcomm Light Theme) ── */
+  --bg: #F8FAFC;
+  --bg-alt: #F1F5F9;
+  --surface: #FFFFFF;
+  --surface-2: #F8FAFC;
+  --surface-3: #F1F5F9;
 
   /* ── Borders ── */
-  --border: #333333;
-  --border-2: #444444;
+  --border: #E2E8F0;
+  --border-2: #CBD5E1;
 
   /* ── Typography ── */
-  --text: #FFFFFF;
-  --text-2: #EEEEEE;
-  --text-3: #999999;
-  --text-4: #777777;
+  --text: #0F172A;
+  --text-2: #1E293B;
+  --text-3: #475569;
+  --text-4: #64748B;
 
-  /* ── Brand (Caterpillar Yellow) ── */
-  --yellow: #FFCC00;
-  --yellow-bg: rgba(255, 204, 0, 0.15);
-  --yellow-border: rgba(255, 204, 0, 0.5);
-  --yellow-text: #FFCC00;
+  /* ── Brand (Qualcomm Blue) ── */
+  --yellow: #3253DC;
+  --yellow-bg: rgba(50, 83, 220, 0.15);
+  --yellow-border: rgba(50, 83, 220, 0.3);
+  --yellow-text: #3253DC;
 
-  /* ── Status Colors (Industrial palette) ── */
-  --green: #4CAF50;
-  --green-bg: rgba(76, 175, 80, 0.15);
-  --green-border: rgba(76, 175, 80, 0.3);
-  --green-text: #81C784;
+  /* ── Status Colors ── */
+  --green: #10B981;
+  --green-bg: rgba(16, 185, 129, 0.15);
+  --green-border: rgba(16, 185, 129, 0.3);
+  --green-text: #059669;
 
-  --amber: #FF9800;
-  --amber-bg: rgba(255, 152, 0, 0.15);
-  --amber-border: rgba(255, 152, 0, 0.3);
-  --amber-text: #FFB74D;
+  --amber: #F59E0B;
+  --amber-bg: rgba(245, 158, 11, 0.15);
+  --amber-border: rgba(245, 158, 11, 0.3);
+  --amber-text: #D97706;
 
-  --red: #D32F2F;
-  --red-bg: rgba(211, 47, 47, 0.15);
-  --red-border: rgba(211, 47, 47, 0.3);
-  --red-text: #E57373;
+  --red: #EF4444;
+  --red-bg: rgba(239, 68, 68, 0.15);
+  --red-border: rgba(239, 68, 68, 0.3);
+  --red-text: #DC2626;
 
-  --blue: #2196F3;
-  --blue-bg: rgba(33, 150, 243, 0.15);
-  --blue-border: rgba(33, 150, 243, 0.3);
-  --blue-text: #64B5F6;
+  /* ── Brand Alt (Qualcomm Blue) ── */
+  --blue: #3253AC;
+  --blue-bg: rgba(50, 83, 172, 0.15);
+  --blue-border: rgba(50, 83, 172, 0.3);
+  --blue-text: #254085;
 
-  --purple: #9C27B0;
-  --purple-bg: rgba(156, 39, 176, 0.15);
-  --purple-border: rgba(156, 39, 176, 0.3);
+  --purple: #8B5CF6;
+  --purple-bg: rgba(139, 92, 246, 0.15);
+  --purple-border: rgba(139, 92, 246, 0.3);
 
-  /* ── Shadows (Solid/Harsh) ── */
-  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.8);
-  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.8);
-  --shadow: 0 4px 8px rgba(0, 0, 0, 0.8);
-  --shadow-md: 0 8px 16px rgba(0, 0, 0, 0.8);
-  --shadow-lg: 0 16px 32px rgba(0, 0, 0, 0.8);
+  /* ── Shadows (Soft/Light) ── */
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+  --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
 
   /* ── Glass -> Removed ── */
   --glass-blur: blur(0px);
@@ -132,7 +133,7 @@ body,
 
 .card:hover {
   box-shadow: var(--shadow);
-  border-color: rgba(255, 255, 255, 0.2);
+  border-color: var(--border-2);
 }
 
 .card-header {
@@ -700,7 +701,7 @@ body,
 }
 
 .prose h1, .prose h2, .prose h3, .prose h4, .prose h5, .prose h6 {
-  color: #fff;
+  color: var(--text);
   font-weight: 700;
   margin-top: 1.5em;
   margin-bottom: 0.5em;
@@ -728,7 +729,7 @@ body,
 
 .prose strong {
   font-weight: 700;
-  color: #fff;
+  color: var(--text);
 }
 
 .prose em {
@@ -749,7 +750,7 @@ body,
   color: var(--text-3);
   font-style: italic;
   margin: 1em 0;
-  background: rgba(255, 204, 0, 0.05);
+  background: rgba(50, 83, 220, 0.05);
   padding: 0.5em 1em;
   border-radius: 0 4px 4px 0;
 }
@@ -761,7 +762,7 @@ body,
   font-family: var(--mono);
   font-size: 0.9em;
   border: 1px solid var(--border);
-  color: #ffb86c;
+  color: var(--blue);
 }
 
 .prose pre {
@@ -777,7 +778,7 @@ body,
   background: transparent;
   padding: 0;
   border: none;
-  color: #f8f8f2;
+  color: var(--text-2);
 }
 
 .prose table {
@@ -796,11 +797,11 @@ body,
 .prose th {
   background: var(--surface-2);
   font-weight: 700;
-  color: #fff;
+  color: var(--text);
 }
 
 .prose tr:nth-child(even) {
-  background: rgba(255, 255, 255, 0.02);
+  background: rgba(0, 0, 0, 0.02);
 }
 
 .prose hr {

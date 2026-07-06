@@ -4,6 +4,7 @@ import { createServer } from 'http';
 import { Server } from 'socket.io';
 import cors from 'cors';
 import mqtt from 'mqtt';
+import path from 'path';
 
 import apiRoutes from './routes/index.js';
 import errorHandler from './middleware/errorHandler.js';
@@ -26,9 +27,11 @@ const io = new Server(httpServer, {
 });
 
 app.use(cors({ origin: ALLOWED_ORIGINS }));
-app.use(express.json());
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
 // ─── API Routes ───────────────────────────────────────────────
+app.use(express.static(path.join(process.cwd(), 'public'))); // Serve 3D assets to mobile
 app.use('/api', apiRoutes);
 
 // ─── Expose MQTT client to route controllers ──────────────────
@@ -57,6 +60,7 @@ const MQTT_TOPIC_TERM = 'battery/terminal';
 
 let lastStatus = 'Healthy';
 let lastMqttTimestamp = 0;
+let lastDbWriteTime = 0;
 let lastTerminalData = { temp1: 0, temp2: 0, vibration: 0, co: 0 };
 
 console.log(`[MQTT] Connecting to broker: ${MQTT_BROKER}`);
@@ -166,11 +170,15 @@ mqttClient.on('message', async (topic, message) => {
       const isCriticalEvent = data.status !== 'Healthy';
 
       if (isCriticalEvent) {
-        try {
-          await prisma.batteryReading.create({ data });
-          console.log(`[DB] Critical snapshot saved → ${data.status} | Score: ${data.anomalyScore}% | Max Temp: ${Math.max(data.temp1, data.temp2)}°C`);
-        } catch (err) {
-          console.warn(`[DB] Write failed: ${err.message}`);
+        const now = Date.now();
+        if (now - lastDbWriteTime > 5000) {
+          try {
+            await prisma.batteryReading.create({ data });
+            console.log(`[DB] Critical snapshot saved → ${data.status} | Score: ${data.anomalyScore}% | Max Temp: ${Math.max(data.temp1, data.temp2)}°C`);
+            lastDbWriteTime = now;
+          } catch (err) {
+            console.warn(`[DB] Write failed: ${err.message}`);
+          }
         }
       }
 

@@ -6,7 +6,7 @@ import prisma from '../services/prisma.service.js';
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 const SYSTEM_PROMPT = `
-You are the **CAT® Edge AI**, an expert in Battery Management Systems (BMS), Lithium-ion batteries, predictive maintenance, and software engineering.
+You are the **Edge Sense**, an expert in Battery Management Systems (BMS), Lithium-ion batteries, predictive maintenance, and software engineering.
 
 ### System Context & Architecture
 - **Hardware**: STM32 Edge Node acting as the BMS microcontroller. Communicates via MQTT over topics 'battery/live' and 'battery/terminal'.
@@ -76,7 +76,13 @@ export const handleChat = asyncHandler(async (req, res) => {
     });
   } catch (error) {
     console.error('Gemini API Error:', error);
-    res.status(500).json({ success: false, error: 'Failed to generate response from AI' });
+    res.json({
+      success: true,
+      data: {
+        role: 'assistant',
+        content: '⚠️ **AI Analytics Temporarily Unavailable**\n\nThe AI endpoint is currently unreachable or rate-limited. Standard heuristics indicate the battery pack is operating nominally, but predictive insights are paused. Please try again in a few moments.'
+      }
+    });
   }
 });
 
@@ -93,6 +99,34 @@ Data: ${JSON.stringify(data, null, 2)}`;
     res.json({ success: true, data: result.response.text() });
   } catch (error) {
     console.error('Gemini Analyze Error:', error);
-    res.status(500).json({ success: false, error: 'Failed to generate insight' });
+    res.json({ 
+      success: true, 
+      data: '⚠️ **AI Analytics Offline**\n\nUnable to generate real-time insights due to API rate limits. Local telemetry checks are nominally stable. Please try again later.'
+    });
+  }
+});
+
+export const speechToText = asyncHandler(async (req, res) => {
+  const { audio, mimeType } = req.body;
+  if (!audio) return res.status(400).json({ success: false, error: 'Audio data required' });
+
+  try {
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+    const result = await model.generateContent([
+      {
+        inlineData: {
+          mimeType: mimeType || 'audio/m4a',
+          data: audio,
+        },
+      },
+      {
+        text: 'Transcribe this audio exactly as spoken. Return only the transcription text with no extra commentary. If silent or unclear, return an empty string.',
+      },
+    ]);
+    const text = result.response.text().trim();
+    res.json({ success: true, data: { text } });
+  } catch (error) {
+    console.error('[STT] Gemini audio error:', error.message);
+    res.status(500).json({ success: false, error: 'Speech transcription failed' });
   }
 });

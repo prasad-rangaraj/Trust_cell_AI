@@ -17,12 +17,18 @@ export function useSocket() {
     socket.on('connect', () => setConnected(true));
     socket.on('disconnect', () => setConnected(false));
 
+    let lastUpdate = 0;
     socket.on('battery:update', (payload) => {
-      setData(payload);
-      setHistory((prev) => {
-        const next = [...prev, { ...payload, ts: Date.now() }];
-        return next.slice(-40); // keep last 40 readings for charts
-      });
+      const now = Date.now();
+      // Throttle updates to max 2 per second to save CPU, unless it's an active warning/critical event
+      if (now - lastUpdate > 500 || payload.status !== 'Healthy') {
+        setData(payload);
+        setHistory((prev) => {
+          const next = [...prev, { ...payload, ts: now }];
+          return next.slice(-40); // keep last 40 readings for charts
+        });
+        lastUpdate = now;
+      }
     });
 
     socket.on('terminal:log', (logLine) => {

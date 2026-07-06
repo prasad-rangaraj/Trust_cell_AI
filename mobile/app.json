@@ -1,0 +1,28 @@
+{
+  "expo": {
+    "name": "Think360 Edge BMS",
+    "slug": "think360-edge-bms",
+    "version": "1.0.0",
+    "sdkVersion": "54.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#3253DC"
+      },
+      "package": "com.anonymous.think360edgebms"
+    },
+    "plugins": [
+      [
+        "expo-av",
+        {
+          "microphonePermission": "Allow Edge Sense AI to access your microphone for hands-free battery diagnostics."
+        }
+      ]
+    ]
+  }
+}

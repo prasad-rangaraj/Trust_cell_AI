@@ -1,6 +1,6 @@
-import { useRef, useMemo, useState, useEffect } from 'react';
+import { useRef, useMemo, useState, Suspense } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { Html, OrbitControls, Environment, Grid, Edges } from '@react-three/drei';
+import { Html, OrbitControls, Environment, Grid, Edges, useGLTF } from '@react-three/drei';
 import { AreaChart, Area, ResponsiveContainer } from 'recharts';
 import { Sliders, Power, CheckCircle, ShieldAlert } from 'lucide-react';
 import * as THREE from 'three';
@@ -198,19 +198,19 @@ function Scene({ data, viewMode }) {
 
   return (
     <>
-      <color attach="background" args={['#121212']} />
-      <ambientLight intensity={0.15} />
-      <pointLight position={[-4, 4, 3]} intensity={2.5} color="#FFCC00" />
-      <pointLight position={[4, 4, 3]} intensity={2.5} color="#D32F2F" />
+      <color attach="background" args={['#F8FAFC']} />
+      <ambientLight intensity={0.4} />
+      <pointLight position={[-4, 4, 3]} intensity={2.5} color="#3253DC" />
+      <pointLight position={[4, 4, 3]} intensity={2.5} color="#E32526" />
       <pointLight position={[0, -4, 2]} intensity={0.5} color="#ffffff" />
-      <Environment preset="night" />
+      <Environment preset="studio" />
 
       {/* High-tech floor grid */}
       <Grid 
         args={[40, 40]} 
         position={[0, -1.8, 0]} 
-        cellColor="#ffffff" 
-        sectionColor="#FFCC00" 
+        cellColor="#CBD5E1" 
+        sectionColor="#3253DC" 
         fadeDistance={25} 
         fadeStrength={1.5} 
         cellThickness={0.5} 
@@ -256,9 +256,211 @@ function Scene({ data, viewMode }) {
   );
 }
 
+// ─── Realistic EV Skateboard Battery Pack ────────────────────────────────────
+function EVSkateboardPack({ data, viewMode }) {
+  // Big enough to fill the car's wheelbase underfloor
+  const moduleW = 1.10;  // wide module
+  const moduleD = 0.70;  // deep module
+  const moduleH = 0.18;  // flat height
+  const gapX    = 0.08;
+  const gapZ    = 0.08;
+  const cols    = 2;
+  const rows    = 5;   // 5 rows to span bumper-to-bumper
+
+  const cellVals = [data?.cell1 ?? 4.0, data?.cell2 ?? 4.0, data?.cell3 ?? 4.0, data?.cell4 ?? 4.0];
+  const temp1 = data?.temp1 ?? 25;
+  const temp2 = data?.temp2 ?? 25;
+
+  const getModuleColor = (idx) => {
+    if (viewMode === 'thermal') {
+      const temp = idx < 4 ? temp1 : temp2;
+      const t = Math.max(0, Math.min(1, (temp - 20) / 40));
+      return `hsl(${(1 - t) * 120}, 90%, 40%)`;
+    }
+    const v = cellVals[idx % 4];
+    return v < 3.85 ? '#c0392b' : '#b0c4d8';
+  };
+
+  const modules = [];
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const idx = r * cols + c;
+      const x = (c - (cols - 1) / 2) * (moduleW + gapX);
+      const z = (r - (rows - 1) / 2) * (moduleD + gapZ);
+      modules.push({ idx, x, z });
+    }
+  }
+
+  const trayW = cols * moduleW + (cols - 1) * gapX + 0.22;
+  const trayD = rows * moduleD + (rows - 1) * gapZ + 0.22;
+  const trayH = 0.08;
+
+  // Positioned to sit INSIDE the car floor (raised up from ground)
+  return (
+    <group position={[0, -0.88, 0]}>
+      {/* Bottom tray / enclosure */}
+      <mesh position={[0, -trayH / 2, 0]}>
+        <boxGeometry args={[trayW, trayH, trayD]} />
+        <meshStandardMaterial color="#8c9aaa" metalness={0.95} roughness={0.25} />
+      </mesh>
+      {/* Tray walls */}
+      {[
+        { pos: [0, moduleH/2, -(trayD/2)+0.025],  size: [trayW, moduleH+0.05, 0.05] },
+        { pos: [0, moduleH/2,  (trayD/2)-0.025],  size: [trayW, moduleH+0.05, 0.05] },
+        { pos: [-(trayW/2)+0.025, moduleH/2, 0],  size: [0.05, moduleH+0.05, trayD] },
+        { pos: [ (trayW/2)-0.025, moduleH/2, 0],  size: [0.05, moduleH+0.05, trayD] },
+      ].map((w, i) => (
+        <mesh key={i} position={w.pos}>
+          <boxGeometry args={w.size} />
+          <meshStandardMaterial color="#7a8899" metalness={0.95} roughness={0.2} />
+        </mesh>
+      ))}
+      {/* Battery modules */}
+      {modules.map(({ idx, x, z }) => (
+        <group key={idx} position={[x, 0, z]}>
+          <mesh position={[0, moduleH / 2, 0]}>
+            <boxGeometry args={[moduleW, moduleH, moduleD]} />
+            <meshStandardMaterial
+              color={getModuleColor(idx)}
+              metalness={0.6} roughness={0.35}
+              emissive={getModuleColor(idx)}
+              emissiveIntensity={viewMode === 'thermal' || cellVals[idx % 4] < 3.85 ? 0.3 : 0.05}
+            />
+          </mesh>
+          {/* Top face gloss */}
+          <mesh position={[0, moduleH + 0.002, 0]}>
+            <boxGeometry args={[moduleW - 0.03, 0.005, moduleD - 0.03]} />
+            <meshStandardMaterial 
+              color={getModuleColor(idx)} 
+              metalness={0.9} roughness={0.1} 
+              emissive={getModuleColor(idx)}
+              emissiveIntensity={viewMode === 'thermal' || cellVals[idx % 4] < 3.85 ? 0.4 : 0.05}
+            />
+          </mesh>
+          {/* Vents across top */}
+          {[-0.3, -0.1, 0.1, 0.3].map((vx, vi) => (
+            <mesh key={vi} position={[vx, moduleH + 0.006, 0]}>
+              <boxGeometry args={[0.025, 0.006, moduleD - 0.06]} />
+              <meshStandardMaterial 
+                color={viewMode === 'thermal' ? getModuleColor(idx) : "#4a5a6a"} 
+                metalness={0.9} roughness={0.1} 
+                emissive={viewMode === 'thermal' ? getModuleColor(idx) : "#000000"}
+                emissiveIntensity={viewMode === 'thermal' ? 0.3 : 0}
+              />
+            </mesh>
+          ))}
+        </group>
+      ))}
+      {/* Orange HV busbar — longitudinal spine */}
+      <mesh position={[0, moduleH + 0.025, 0]}>
+        <boxGeometry args={[0.07, 0.03, trayD - 0.12]} />
+        <meshStandardMaterial color="#e05a00" metalness={0.7} roughness={0.2} emissive="#ff4400" emissiveIntensity={0.5} />
+      </mesh>
+      {/* Orange HV busbars — cross connectors between rows */}
+      {Array.from({ length: rows - 1 }).map((_, bi) => {
+        const bz = ((bi) - (rows - 2) / 2) * (moduleD + gapZ);
+        return (
+          <mesh key={bi} position={[0, moduleH + 0.025, bz + (moduleD + gapZ) / 2]}>
+            <boxGeometry args={[trayW - 0.12, 0.03, 0.065]} />
+            <meshStandardMaterial color="#e05a00" metalness={0.7} roughness={0.2} emissive="#ff4400" emissiveIntensity={0.5} />
+          </mesh>
+        );
+      })}
+      {/* Front BMS / connector block */}
+      <mesh position={[0, moduleH + 0.03, -(trayD / 2) + 0.03]}>
+        <boxGeometry args={[0.25, 0.08, 0.10]} />
+        <meshStandardMaterial color="#e05a00" metalness={0.8} roughness={0.2} emissive="#ff4400" emissiveIntensity={0.6} />
+      </mesh>
+      {/* Blue cooling plate */}
+      <mesh position={[0, -0.01, 0]}>
+        <boxGeometry args={[trayW - 0.08, 0.02, trayD - 0.08]} />
+        <meshStandardMaterial color="#1a5a8a" metalness={0.9} roughness={0.3} />
+      </mesh>
+    </group>
+  );
+}
+
+// ─── Car Model Scene ─────────────────────────────────────────────────────────
+function CarModel({ data, viewMode }) {
+  const { scene } = useGLTF('/ev_car.glb');
+
+  useMemo(() => {
+    scene.traverse((child) => {
+      if (child.isMesh) {
+        // Hide exhaust/muffler meshes since EVs don't have them
+        const name = child.name.toLowerCase();
+        if (name.includes('exhaust') || name.includes('muffler') || name.includes('tailpipe') || name.includes('pipe')) {
+          child.visible = false;
+          return;
+        }
+
+        if (child.material) {
+          const mats = Array.isArray(child.material) ? child.material : [child.material];
+          mats.forEach((mat) => {
+            mat.transparent      = true;
+            mat.opacity          = 0.18;
+            mat.depthWrite       = false;
+            mat.color            = new THREE.Color('#a8c8ff');
+            mat.emissive         = new THREE.Color('#3253DC');
+            mat.emissiveIntensity= 0.35;
+            mat.metalness        = 0.9;
+            mat.roughness        = 0.05;
+            mat.side             = THREE.DoubleSide;
+            mat.needsUpdate      = true;
+          });
+        }
+      }
+    });
+  }, [scene]);
+
+  return (
+    <>
+      <ambientLight intensity={0.6} />
+      <directionalLight position={[5, 10, 5]}  intensity={1.5} />
+      <directionalLight position={[-5, 8, -5]} intensity={0.8} />
+      <pointLight position={[0, 5,  4]} intensity={2.0} color="#3253DC" />
+      <pointLight position={[0, 2, -4]} intensity={1.5} color="#60a5fa" />
+      <pointLight position={[4, 1,  0]} intensity={1.0} color="#818cf8" />
+      <Environment preset="city" />
+
+      <Grid args={[40, 40]} position={[0, -1.6, 0]}
+        cellColor="#CBD5E1" sectionColor="#3253DC"
+        fadeDistance={28} fadeStrength={1.5}
+        cellThickness={0.5} sectionThickness={1.2}
+      />
+
+      <primitive object={scene} position={[0, -1.2, 0]} scale={[2.2, 2.2, 2.2]} />
+      <EVSkateboardPack data={data} viewMode={viewMode} />
+
+      <OrbitControls
+        enablePan={false}
+        minDistance={3}
+        maxDistance={24}
+        minPolarAngle={0}
+        maxPolarAngle={Math.PI / 2.1}
+      />
+    </>
+  );
+}
+
+function CarViewScene({ data, viewMode }) {
+  return (
+    <Canvas camera={{ position: [0, 4, 14], fov: 50 }} style={{ width: '100%', height: '100%' }}
+      gl={{ antialias: true, alpha: false }}>
+      <Suspense fallback={
+        <Html center>
+          <div style={{ color: '#3253DC', fontSize: 14, fontWeight: 700, fontFamily: 'monospace' }}>Loading car model...</div>
+        </Html>
+      }>
+        <CarModel data={data} viewMode={viewMode} />
+      </Suspense>
+    </Canvas>
+  );
+}
+
 // ─── Main Page ────────────────────────────────────────────────────────────────
 export default function DigitalTwin({ data, history = [], connected }) {
-  const [viewMode, setViewMode] = useState('voltage'); // 'voltage' | 'thermal'
+  const [viewMode, setViewMode] = useState('voltage'); // 'voltage' | 'thermal' | 'car'
 
   // Build healthy & weak history series from live history
   const healthyHistory = useMemo(() =>
@@ -282,18 +484,18 @@ export default function DigitalTwin({ data, history = [], connected }) {
         </div>
         <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
           <div style={{ background: 'var(--surface-2)', padding: 4, borderRadius: 8, display: 'flex', gap: 4, border: '1px solid var(--border)' }}>
-            <button 
-              onClick={() => setViewMode('voltage')}
-              style={{ padding: '6px 12px', borderRadius: 6, fontSize: 12, fontWeight: 600, background: viewMode === 'voltage' ? 'var(--yellow)' : 'transparent', color: viewMode === 'voltage' ? '#000' : 'var(--text-2)', border: 'none', cursor: 'pointer', transition: '0.2s' }}
-            >
-              Voltage View
-            </button>
-            <button 
-              onClick={() => setViewMode('thermal')}
-              style={{ padding: '6px 12px', borderRadius: 6, fontSize: 12, fontWeight: 600, background: viewMode === 'thermal' ? 'var(--yellow)' : 'transparent', color: viewMode === 'thermal' ? '#000' : 'var(--text-2)', border: 'none', cursor: 'pointer', transition: '0.2s' }}
-            >
-              Thermal Heatmap
-            </button>
+            {[
+              { id: 'voltage', label: '⚡ Voltage View' },
+              { id: 'thermal', label: '🌡 Thermal Heatmap' },
+            ].map(btn => (
+              <button key={btn.id}
+                onClick={() => setViewMode(btn.id)}
+                style={{ padding: '6px 14px', borderRadius: 6, fontSize: 12, fontWeight: 600,
+                  background: viewMode === btn.id ? 'var(--blue)' : 'transparent',
+                  color: viewMode === btn.id ? '#fff' : 'var(--text-2)',
+                  border: 'none', cursor: 'pointer', transition: 'all 0.2s' }}
+              >{btn.label}</button>
+            ))}
           </div>
           <div className="card" style={{ padding: '8px 14px', display: 'flex', alignItems: 'center', gap: 10 }}>
             <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--green)', animation: 'dot-pulse 1.5s infinite' }} />
@@ -312,40 +514,41 @@ export default function DigitalTwin({ data, history = [], connected }) {
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: 24, alignItems: 'start' }}>
 
         {/* 3D Canvas */}
-        <div className="card" style={{ overflow: 'hidden', background: '#121212', border: '1px solid rgba(255, 204, 0, 0.2)', boxShadow: '0 10px 30px rgba(255, 204, 0, 0.05)' }}>
+        <div className="card" style={{ overflow: 'hidden', background: '#0a0a14', border: '1px solid var(--border)', boxShadow: 'var(--shadow-sm)' }}>
           <div style={{ height: 'calc(100vh - 200px)', minHeight: 600, position: 'relative' }}>
-            <Canvas
-              camera={{ position: [0, 5, 14], fov: 45 }}
-              style={{ width: '100%', height: '100%' }}
-              gl={{ antialias: true, alpha: false }}
-            >
-              <Scene data={data} viewMode={viewMode} />
-            </Canvas>
+            <CarViewScene data={data} viewMode={viewMode} />
 
             {/* Corner labels / Heatmap Legend */}
-            {viewMode === 'thermal' ? (
+            {viewMode === 'thermal' && (
               <div style={{ position: 'absolute', right: 20, top: '50%', transform: 'translateY(-50%)', display: 'flex', alignItems: 'center', gap: 12, pointerEvents: 'none' }}>
-                <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', height: 200, color: '#fff', fontSize: 11, fontFamily: 'var(--mono)', fontWeight: 600 }}>
-                  <span>60°C</span>
-                  <span>40°C</span>
-                  <span>20°C</span>
-                </div>
-                <div style={{ width: 12, height: 200, borderRadius: 6, background: 'linear-gradient(to top, hsl(120, 100%, 50%), hsl(60, 100%, 50%), hsl(0, 100%, 50%))', border: '1px solid rgba(255,255,255,0.2)', boxShadow: '0 0 15px rgba(0,0,0,0.5)' }} />
-              </div>
-            ) : (
-              <div style={{ position: 'absolute', top: 14, left: 16, display: 'flex', gap: 10, pointerEvents: 'none' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'rgba(0,0,0,0.6)', padding: '4px 10px', borderRadius: 6, border: '1px solid rgba(255, 204, 0, 0.3)' }}>
-                  <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#FFCC00', boxShadow: '0 0 6px #FFCC00' }} />
-                  <span style={{ color: '#FFCC00', fontSize: 11, fontWeight: 700, fontFamily: 'var(--mono)' }}>HEALTHY CELL</span>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'rgba(0,0,0,0.6)', padding: '4px 10px', borderRadius: 6, border: '1px solid rgba(211, 47, 47, 0.3)' }}>
-                  <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#D32F2F', boxShadow: '0 0 6px #D32F2F' }} />
-                  <span style={{ color: '#D32F2F', fontSize: 11, fontWeight: 700, fontFamily: 'var(--mono)' }}>WEAK CELL</span>
+                <div style={{ height: 200, display: 'grid', gridTemplateColumns: '40px 1fr', gap: 10 }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', height: 200, color: 'var(--text)', fontSize: 11, fontFamily: 'var(--mono)', fontWeight: 600 }}>
+                    <span>60°C</span><span>40°C</span><span>20°C</span>
+                  </div>
+                  <div style={{ width: 12, height: 200, borderRadius: 6, background: 'linear-gradient(to top, hsl(120,100%,50%), hsl(60,100%,50%), hsl(0,100%,50%))', border: '1px solid var(--border)' }} />
                 </div>
               </div>
             )}
+            {viewMode === 'voltage' && (
+              <div style={{ position: 'absolute', top: 14, left: 16, display: 'flex', gap: 10, pointerEvents: 'none' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(4px)', padding: '4px 10px', borderRadius: 6, border: '1px solid rgba(255,255,255,0.2)' }}>
+                  <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#b0c4d8', boxShadow: '0 0 6px #b0c4d8' }} />
+                  <span style={{ color: '#b0c4d8', fontSize: 11, fontWeight: 700, fontFamily: 'var(--mono)' }}>HEALTHY MODULE</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(4px)', padding: '4px 10px', borderRadius: 6, border: '1px solid rgba(255,255,255,0.2)' }}>
+                  <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#c0392b', boxShadow: '0 0 6px #c0392b' }} />
+                  <span style={{ color: '#c0392b', fontSize: 11, fontWeight: 700, fontFamily: 'var(--mono)' }}>WEAK MODULE</span>
+                </div>
+              </div>
+            )}
+            
+            <div style={{ position: 'absolute', top: 14, right: viewMode === 'thermal' ? 60 : 16, pointerEvents: 'none' }}>
+              <div style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(6px)', border: '1px solid rgba(50,83,220,0.4)', borderRadius: 8, padding: '6px 12px' }}>
+                <span style={{ color: '#3253DC', fontSize: 11, fontWeight: 700, fontFamily: 'monospace' }}>🚗 LIVE VEHICLE DIGITAL TWIN</span>
+              </div>
+            </div>
 
-            <div style={{ position: 'absolute', bottom: 12, right: 14, color: 'rgba(255,255,255,0.25)', fontSize: 10, fontFamily: 'var(--mono)', pointerEvents: 'none' }}>
+            <div style={{ position: 'absolute', bottom: 12, right: 14, color: 'rgba(255,255,255,0.35)', fontSize: 10, fontFamily: 'var(--mono)', pointerEvents: 'none' }}>
               Drag to orbit • Scroll to zoom
             </div>
           </div>

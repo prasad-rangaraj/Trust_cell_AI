@@ -260,7 +260,7 @@ export default function SystemConfig({ data, connected }) {
                         setRelayLoading(true);
                         await fetch('/api/system/relay', {
                           method: 'POST',
-                          headers: { 'Content-Type': 'application/json' },
+                          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer cat-edge-bms-2026' },
                           body: JSON.stringify({ relay: rel.id, action: 'CONNECT' })
                         });
                         setRelayLoading(false);
@@ -276,7 +276,7 @@ export default function SystemConfig({ data, connected }) {
                         setRelayLoading(true);
                         await fetch('/api/system/relay', {
                           method: 'POST',
-                          headers: { 'Content-Type': 'application/json' },
+                          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer cat-edge-bms-2026' },
                           body: JSON.stringify({ relay: rel.id, action: 'DISCONNECT' })
                         });
                         setRelayLoading(false);

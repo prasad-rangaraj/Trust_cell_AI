@@ -88,8 +88,8 @@ export default function AIInsights({ data, history }) {
       <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
         
         {/* Node Topology Visualization */}
-        <div className="card" style={{ background: '#000000', borderColor: 'var(--yellow-border)' }}>
-          <div className="card-header" style={{ borderBottom: '1px solid rgba(255, 204, 0, 0.2)' }}>
+        <div className="card" style={{ background: 'var(--surface-2)', borderColor: 'var(--yellow-border)' }}>
+          <div className="card-header" style={{ borderBottom: '1px solid rgba(227, 37, 38, 0.2)' }}>
             <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-2)' }}>Neural Network Data Flow</span>
             <span className="badge" style={{ background: 'var(--yellow-bg)', color: 'var(--yellow)', border: 'none' }}><Activity size={10} style={{ marginRight: 4 }}/> INFERENCE ACTIVE</span>
           </div>
@@ -109,7 +109,7 @@ export default function AIInsights({ data, history }) {
                 <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                   <div style={{ textAlign: 'right' }}>
                     <div style={{ fontSize: 10, color: 'var(--text-4)' }}>{input.label}</div>
-                    <div style={{ fontSize: 13, fontFamily: 'var(--mono)', color: 'white', fontWeight: 600 }}>{input.val}</div>
+                    <div style={{ fontSize: 13, fontFamily: 'var(--mono)', color: 'var(--text-2)', fontWeight: 600 }}>{input.val}</div>
                   </div>
                   <div style={{ width: 14, height: 14, borderRadius: '50%', background: input.color, boxShadow: `0 0 10px ${input.color}` }} />
                 </div>
