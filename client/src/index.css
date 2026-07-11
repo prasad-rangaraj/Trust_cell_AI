@@ -1164,4 +1164,9 @@ body,
 @keyframes liquid-spin {
   0%   { transform: translate(-50%, -100%) rotate(0deg); }
   100% { transform: translate(-50%, -100%) rotate(360deg); }
+}@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+.animate-spin {
+  animation: spin 1s linear infinite;
 }

@@ -179,6 +179,7 @@ class ChatRequest(BaseModel):
     message:     str
     history:     list[ChatMessage] = Field(default_factory=list)
     contextData: Optional[dict[str, Any]] = None
+    isVoice:     bool = False
 
 
 class InsightRequest(BaseModel):
@@ -187,4 +188,8 @@ class InsightRequest(BaseModel):
 
 class SpeechToTextRequest(BaseModel):
     audio:    str          # base64 encoded
-    mimeType: str = "audio/m4a"
+    mimeType: str = "audio/webm"
+
+class TextToSpeechRequest(BaseModel):
+    text: str
+    target_language_code: str = "hi-IN"

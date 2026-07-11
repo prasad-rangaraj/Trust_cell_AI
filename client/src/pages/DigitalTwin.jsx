@@ -1,8 +1,8 @@
-import { useRef, useMemo, useState, Suspense } from 'react';
+import { useRef, useMemo, useState, Suspense, useEffect } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { Html, OrbitControls, Environment, Grid, Edges, useGLTF } from '@react-three/drei';
 import { AreaChart, Area, ResponsiveContainer } from 'recharts';
-import { Sliders, Power, CheckCircle, ShieldAlert } from 'lucide-react';
+import { Sliders, Power, CheckCircle, ShieldAlert, Maximize2, Minimize2, Expand, Loader2 } from 'lucide-react';
 import * as THREE from 'three';
 
 // ─── Glowing Battery Cell ────────────────────────────────────────────────────
@@ -672,7 +672,9 @@ function CarViewScene({ data, viewMode }) {
       gl={{ antialias: true, alpha: false }}>
       <Suspense fallback={
         <Html center>
-          <div style={{ color: '#3253DC', fontSize: 14, fontWeight: 700, fontFamily: 'monospace' }}>Loading car model...</div>
+          <div className="animate-spin" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Loader2 size={32} color="#3253DC" />
+          </div>
         </Html>
       }>
         <CarModel data={data} viewMode={viewMode} />
@@ -684,6 +686,23 @@ function CarViewScene({ data, viewMode }) {
 // ─── Main Page ────────────────────────────────────────────────────────────────
 export default function DigitalTwin({ data, history = [], connected }) {
   const [viewMode, setViewMode] = useState('voltage'); // 'voltage' | 'thermal' | 'car'
+  const [isMaximized, setIsMaximized] = useState(false);
+  const [isNativeFullScreen, setIsNativeFullScreen] = useState(false);
+  const containerRef = useRef(null);
+
+  useEffect(() => {
+    const handleFs = () => setIsNativeFullScreen(!!document.fullscreenElement);
+    document.addEventListener('fullscreenchange', handleFs);
+    return () => document.removeEventListener('fullscreenchange', handleFs);
+  }, []);
+
+  const toggleFullScreen = () => {
+    if (!document.fullscreenElement) {
+      containerRef.current?.requestFullscreen?.();
+    } else {
+      document.exitFullscreen?.();
+    }
+  };
 
   // Build healthy & weak history series from live history
   const healthyHistory = useMemo(() =>
@@ -737,8 +756,16 @@ export default function DigitalTwin({ data, history = [], connected }) {
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: 24, alignItems: 'start' }}>
 
         {/* 3D Canvas */}
-        <div className="card" style={{ overflow: 'hidden', background: '#0a0a14', border: '1px solid var(--border)', boxShadow: 'var(--shadow-sm)' }}>
-          <div style={{ height: 'calc(100vh - 200px)', minHeight: 600, position: 'relative' }}>
+        <div 
+          ref={containerRef}
+          className="card" 
+          style={isMaximized ? {
+            position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 9999,
+            margin: 0, borderRadius: 0,
+            overflow: 'hidden', background: '#0a0a14',
+          } : { overflow: 'hidden', background: '#0a0a14', border: '1px solid var(--border)', boxShadow: 'var(--shadow-sm)' }}
+        >
+          <div style={{ height: (isMaximized || isNativeFullScreen) ? '100vh' : 'calc(100vh - 200px)', minHeight: (isMaximized || isNativeFullScreen) ? '100vh' : 600, position: 'relative' }}>
             <CarViewScene data={data} viewMode={viewMode} />
 
             {/* Corner labels / Heatmap Legend */}
@@ -765,10 +792,24 @@ export default function DigitalTwin({ data, history = [], connected }) {
               </div>
             )}
             
-            <div style={{ position: 'absolute', top: 14, right: viewMode === 'thermal' ? 60 : 16, pointerEvents: 'none' }}>
-              <div style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(6px)', border: '1px solid rgba(50,83,220,0.4)', borderRadius: 8, padding: '6px 12px' }}>
+            <div style={{ position: 'absolute', top: 14, right: viewMode === 'thermal' ? 60 : 16, display: 'flex', gap: 10, alignItems: 'center' }}>
+              <div style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(6px)', border: '1px solid rgba(50,83,220,0.4)', borderRadius: 8, padding: '6px 12px', pointerEvents: 'none' }}>
                 <span style={{ color: '#3253DC', fontSize: 11, fontWeight: 700, fontFamily: 'monospace' }}>🚗 LIVE VEHICLE DIGITAL TWIN</span>
               </div>
+              <button 
+                onClick={() => setIsMaximized(!isMaximized)}
+                style={{ background: 'rgba(0,0,0,0.6)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: 6, color: 'white', padding: '6px', cursor: 'pointer', display: 'flex' }}
+                title={isMaximized ? "Minimize" : "Maximize"}
+              >
+                {isMaximized ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
+              </button>
+              <button 
+                onClick={toggleFullScreen}
+                style={{ background: 'rgba(0,0,0,0.6)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: 6, color: 'white', padding: '6px', cursor: 'pointer', display: 'flex' }}
+                title="Full Screen"
+              >
+                <Expand size={16} />
+              </button>
             </div>
 
             <div style={{ position: 'absolute', bottom: 12, right: 14, color: 'rgba(255,255,255,0.35)', fontSize: 10, fontFamily: 'var(--mono)', pointerEvents: 'none' }}>

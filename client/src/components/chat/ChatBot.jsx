@@ -4,9 +4,6 @@ import { MessageSquare, X, Send, Bot, User, Loader2, Mic, MicOff, Volume2, Volum
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
-const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-const synth = window.speechSynthesis;
-
 function stripMarkdown(text) {
   return text
     .replace(/```[\s\S]*?```/g, '')
@@ -32,42 +29,84 @@ export default function ChatBot({ data }) {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [ttsEnabled, setTtsEnabled] = useState(true);
   const [interimText, setInterimText] = useState('');    // live transcript preview
-  const [micSupported] = useState(!!SpeechRecognition);
+  const [micSupported] = useState(!!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia));
   const messagesEndRef = useRef(null);
-  const recognitionRef = useRef(null);
-  const isTypingRef = useRef(false);  // avoid stale closure in recognition callback
+  const mediaRecorderRef = useRef(null);
+  const audioChunksRef = useRef([]);
+  const currentAudioRef = useRef(null);
+  const speechRecRef = useRef(null);
+  const isTypingRef = useRef(false);
   const callModeRef = useRef(false);
+  const currentLangRef = useRef('hi-IN');
+  const isSpeakingRef = useRef(false);
 
   useEffect(() => { isTypingRef.current = isTyping; }, [isTyping]);
   useEffect(() => { callModeRef.current = isCallMode; }, [isCallMode]);
+  useEffect(() => { isSpeakingRef.current = isSpeaking; }, [isSpeaking]);
 
   useEffect(() => {
     if (isOpen) messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isOpen]);
 
   useEffect(() => {
-    if (!isOpen) { synth.cancel(); setIsSpeaking(false); stopCallMode(); }
+    if (!isOpen) { stopSpeaking(); stopCallMode(); }
   }, [isOpen]);
 
-  // ── TTS ──────────────────────────────────────────────────────
-  const speak = useCallback((text, onDone) => {
-    if (!ttsEnabled || !synth) { onDone?.(); return; }
-    synth.cancel();
-    const utterance = new SpeechSynthesisUtterance(stripMarkdown(text));
-    utterance.rate = 1.05;
-    utterance.pitch = 1;
-    utterance.volume = 1;
-    const voices = synth.getVoices();
-    const preferred = voices.find(v => v.lang === 'en-US' && v.name.includes('Google'))
-      || voices.find(v => v.lang === 'en-US') || voices[0];
-    if (preferred) utterance.voice = preferred;
-    utterance.onstart = () => setIsSpeaking(true);
-    utterance.onend = () => { setIsSpeaking(false); onDone?.(); };
-    utterance.onerror = () => { setIsSpeaking(false); onDone?.(); };
-    synth.speak(utterance);
-  }, [ttsEnabled]);
+  // ── Sarvam TTS ──────────────────────────────────────────────────────
+  const stopSpeaking = () => { 
+    if (currentAudioRef.current) {
+      currentAudioRef.current.pause();
+      currentAudioRef.current.currentTime = 0;
+      currentAudioRef.current = null;
+    }
+    isSpeakingRef.current = false;
+    setIsSpeaking(false); 
+  };
 
-  const stopSpeaking = () => { synth.cancel(); setIsSpeaking(false); };
+  const speak = useCallback(async (text, onDone) => {
+    if (!ttsEnabled) { onDone?.(); return; }
+    stopSpeaking();
+    
+    try {
+      setInterimText('Generating voice...');
+      const res = await fetch('/api/chat/text-to-speech', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: stripMarkdown(text), target_language_code: currentLangRef.current })
+      });
+      const resData = await res.json();
+      setInterimText('');
+      
+      if (resData.success && resData.data.audio) {
+        const audioSrc = `data:audio/wav;base64,${resData.data.audio}`;
+        const audio = new Audio(audioSrc);
+        currentAudioRef.current = audio;
+        
+        audio.onplay = () => {
+          isSpeakingRef.current = true;
+          setIsSpeaking(true);
+        };
+        audio.onended = () => { 
+          isSpeakingRef.current = false;
+          setIsSpeaking(false); 
+          onDone?.(); 
+        };
+        audio.onerror = () => { 
+          isSpeakingRef.current = false;
+          setIsSpeaking(false); 
+          onDone?.(); 
+        };
+        
+        await audio.play();
+      } else {
+        onDone?.();
+      }
+    } catch (e) {
+      console.error("TTS Error", e);
+      setInterimText('');
+      onDone?.();
+    }
+  }, [ttsEnabled]);
 
   // ── Send message ─────────────────────────────────────────────
   const sendMessage = useCallback(async (userMessage, resumeListeningAfter = false) => {
@@ -81,18 +120,19 @@ export default function ChatBot({ data }) {
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: userMessage, history: messages, contextData: data })
+        body: JSON.stringify({ message: userMessage, history: messages, contextData: data, isVoice: resumeListeningAfter })
       });
       const resData = await response.json();
       const aiMsg = resData.success
         ? resData.data
         : { role: 'assistant', content: `Sorry, an error occurred: ${resData.error || 'Unknown error'}.` };
       setMessages(prev => [...prev, aiMsg]);
-      if (resumeListeningAfter && callModeRef.current) {
-        // Speak, then resume listening after AI finishes talking
-        speak(aiMsg.content, () => { if (callModeRef.current) startRecognition(); });
-      } else {
-        speak(aiMsg.content);
+      if (callModeRef.current) {
+        if (resumeListeningAfter) {
+          speak(aiMsg.content, () => { if (callModeRef.current) startRecognition(); });
+        } else {
+          speak(aiMsg.content);
+        }
       }
     } catch {
       setMessages(prev => [...prev, { role: 'assistant', content: 'Connection failed. Ensure the server is running.' }]);
@@ -101,54 +141,135 @@ export default function ChatBot({ data }) {
     }
   }, [messages, data, speak]);
 
-  // ── Speech Recognition (single-shot) ─────────────────────────
-  const startRecognition = useCallback(() => {
+  // ── Speech Recognition via MediaRecorder & Sarvam API ─────────────
+  const startRecognition = useCallback(async () => {
     if (!micSupported) return;
-    // Don't start if AI is currently speaking or processing
-    if (isTypingRef.current || synth.speaking) return;
+    if (isTypingRef.current || isSpeakingRef.current) return;
 
-    const recognition = new SpeechRecognition();
-    recognition.lang = 'en-US';
-    recognition.interimResults = true;   // show live preview
-    recognition.maxAlternatives = 1;
-    recognition.continuous = false;      // single utterance per session
-    recognitionRef.current = recognition;
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+      mediaRecorderRef.current = mediaRecorder;
+      audioChunksRef.current = [];
 
-    recognition.onstart = () => setIsListening(true);
-    recognition.onend = () => {
-      setIsListening(false);
-      setInterimText('');
-    };
-    recognition.onerror = (e) => {
-      // 'no-speech' fires when mic times out with no audio — just restart in call mode
-      if (e.error === 'no-speech' && callModeRef.current) {
-        startRecognition();
-      }
-      setIsListening(false);
-      setInterimText('');
-    };
-    recognition.onresult = (event) => {
-      let interim = '';
-      let final = '';
-      for (let i = event.resultIndex; i < event.results.length; i++) {
-        if (event.results[i].isFinal) {
-          final += event.results[i][0].transcript;
-        } else {
-          interim += event.results[i][0].transcript;
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) audioChunksRef.current.push(event.data);
+      };
+
+      // Visual live captions (UI only)
+      const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (SpeechRec) {
+        try {
+          const rec = new SpeechRec();
+          rec.continuous = true;
+          rec.interimResults = true;
+          rec.onresult = (event) => {
+            let interim = '';
+            for (let i = event.resultIndex; i < event.results.length; i++) {
+              interim += event.results[i][0].transcript;
+            }
+            if (interim) setInterimText(interim);
+          };
+          rec.start();
+          speechRecRef.current = rec;
+        } catch (err) {
+          console.warn('SpeechRecognition UI fallback failed', err);
         }
       }
-      if (interim) setInterimText(interim);
-      if (final.trim()) {
-        setInterimText('');
-        recognition.stop();
-        if (callModeRef.current) {
-          sendMessage(final.trim(), true); // resume listening after AI replies
-        } else {
-          setInput(final.trim());
+
+      mediaRecorder.onstart = () => {
+        setIsListening(true);
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const source = audioContext.createMediaStreamSource(stream);
+        const analyser = audioContext.createAnalyser();
+        analyser.minDecibels = -50;
+        source.connect(analyser);
+        const dataArray = new Uint8Array(analyser.frequencyBinCount);
+        
+        let silenceStart = Date.now();
+        let hasSpoken = false;
+
+        const checkSilence = () => {
+          if (mediaRecorder.state !== 'recording') {
+            audioContext.close();
+            return;
+          }
+          analyser.getByteFrequencyData(dataArray);
+          const sum = dataArray.reduce((a, b) => a + b, 0);
+          
+          if (sum > 200) { 
+            silenceStart = Date.now();
+            hasSpoken = true;
+          }
+          
+          const silenceDuration = Date.now() - silenceStart;
+          if ((hasSpoken && silenceDuration > 1000) || (!hasSpoken && silenceDuration > 7000)) {
+            mediaRecorder.stop();
+          } else {
+            requestAnimationFrame(checkSilence);
+          }
+        };
+        checkSilence();
+      };
+      
+      mediaRecorder.onstop = async () => {
+        setIsListening(false);
+        if (speechRecRef.current) {
+          try { speechRecRef.current.stop(); } catch(e){}
         }
-      }
-    };
-    recognition.start();
+        
+        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+        stream.getTracks().forEach(track => track.stop());
+        
+        if (audioBlob.size > 0 && callModeRef.current) {
+          const reader = new FileReader();
+          reader.readAsDataURL(audioBlob);
+          reader.onloadend = async () => {
+            const base64Audio = reader.result.split(',')[1];
+            setInterimText('Transcribing via Sarvam AI...');
+            try {
+              const res = await fetch('/api/chat/speech-to-text', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ audio: base64Audio, mimeType: 'audio/webm' })
+              });
+              const sttData = await res.json();
+              setInterimText('');
+              if (sttData.success && sttData.data.text) {
+                if (sttData.data.language_code) {
+                  currentLangRef.current = sttData.data.language_code;
+                }
+                
+                if (callModeRef.current) {
+                  sendMessage(sttData.data.text, true);
+                } else {
+                  setInput(sttData.data.text);
+                }
+              } else {
+                if (sttData.error) {
+                  setInterimText(`Error: ${sttData.error}`);
+                  setTimeout(() => { 
+                    setInterimText(''); 
+                    if (callModeRef.current) startRecognition(); 
+                  }, 3000);
+                } else {
+                  if (callModeRef.current) startRecognition();
+                }
+              }
+            } catch (err) {
+              setInterimText('');
+              if (callModeRef.current) startRecognition();
+            }
+          };
+        } else {
+           if (callModeRef.current) startRecognition();
+        }
+      };
+      
+      mediaRecorder.start();
+    } catch (e) {
+      console.error('Mic error:', e);
+    }
   }, [micSupported, sendMessage]);
 
   // ── Call Mode ────────────────────────────────────────────────
@@ -161,7 +282,12 @@ export default function ChatBot({ data }) {
   const stopCallMode = () => {
     setIsCallMode(false);
     callModeRef.current = false;
-    recognitionRef.current?.stop();
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
+      mediaRecorderRef.current.stop();
+    }
+    if (speechRecRef.current) {
+      try { speechRecRef.current.stop(); } catch(e){}
+    }
     setIsListening(false);
     setInterimText('');
     stopSpeaking();
