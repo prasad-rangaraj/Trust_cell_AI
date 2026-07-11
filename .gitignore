@@ -1,0 +1,48 @@
+# Python / Server
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Android / Kotlin / Gradle
+*.iml
+.gradle
+/local.properties
+/.idea/caches
+/.idea/libraries
+/.idea/modules.xml
+/.idea/workspace.xml
+/.idea/navEditor.xml
+/.idea/assetWizardSettings.xml
+.DS_Store
+/build
+captures
+.externalNativeBuild
+.cxx
+local.properties
+
+# Android specific
+*.apk
+*.ap_
+*.aab
+*.dex
+*.class
+bin/
+gen/
+out/
+
+# Ktor Server
+server-kotlin/build/
+android-app/server/build/
+android-app/client/build/
+android-app/client/app/build/
+
+# Mac
+.DS_Store
