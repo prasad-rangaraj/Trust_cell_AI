@@ -14,10 +14,14 @@ import androidx.compose.ui.draw.*
 import androidx.compose.ui.graphics.*
 import androidx.compose.ui.text.font.*
 import androidx.compose.ui.unit.*
+import androidx.compose.ui.res.painterResource
+import com.think360.bms.R
 import androidx.navigation.NavController
 import com.think360.bms.ui.theme.*
 import com.think360.bms.viewmodel.BmsViewModel
+import com.think360.bms.data.sarvam.*
 import java.util.Calendar
+
 
 @Composable
 fun HomeScreen(viewModel: BmsViewModel, navController: NavController) {
@@ -126,10 +130,20 @@ fun HomeScreen(viewModel: BmsViewModel, navController: NavController) {
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        "EV Guardian",
-                        color = heroTextColor, fontWeight = FontWeight.Black, fontSize = 20.sp
-                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Image(
+                            painter = painterResource(id = R.drawable.ic_launcher),
+                            contentDescription = "EV Assistant Brand Logo",
+                            modifier = Modifier.size(28.dp)
+                        )
+                        Text(
+                            "EV Assistant",
+                            color = heroTextColor, fontWeight = FontWeight.Black, fontSize = 20.sp
+                        )
+                    }
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                         Box(
                             modifier = Modifier
@@ -239,6 +253,166 @@ fun HomeScreen(viewModel: BmsViewModel, navController: NavController) {
             MinimalActionButton(Icons.Outlined.AcUnit, "Climate")
             MinimalActionButton(Icons.Outlined.Lightbulb, "Lights")
             MinimalActionButton(Icons.Outlined.LocalMall, "Frunk")
+        }
+
+        Spacer(Modifier.height(20.dp))
+
+        // ── Sarvam Edge Hackathon Control Panel ──────────────────────────────────
+        val controller = viewModel.voiceAlertController
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp),
+            shape = RoundedCornerShape(20.dp),
+            colors = CardDefaults.cardColors(containerColor = ColorSurface),
+            border = BorderStroke(1.dp, ColorBorder)
+        ) {
+            Column(modifier = Modifier.padding(20.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Icon(Icons.Filled.AutoAwesome, contentDescription = null, tint = ColorPurple)
+                    Text("Sarvam Edge Safety Assistant", color = ColorText, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                }
+                Spacer(modifier = Modifier.height(14.dp))
+
+                // Alert Simulation Button
+                Button(
+                    onClick = {
+                        val mockJson = """
+                            {
+                              "event": "driver_drowsy",
+                              "driverStatus": "DROWSY",
+                              "confidence": 0.97,
+                              "riskLevel": "HIGH",
+                              "timestamp": ${System.currentTimeMillis() / 1000}
+                            }
+                        """.trimIndent()
+                        viewModel.bluetoothManager.simulateReceive(mockJson)
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = ColorPurple),
+                    shape = RoundedCornerShape(10.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Icon(Icons.Filled.Warning, contentDescription = null, modifier = Modifier.size(16.dp))
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Simulate Drowsy Alert")
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // Driver Status Toggle Buttons
+                val currentStatus by controller.currentDriverStatus.collectAsState()
+                Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.fillMaxWidth()) {
+                    OutlinedButton(
+                        onClick = { controller.updateDriverStatus("NORMAL") },
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            containerColor = if (currentStatus == "NORMAL") ColorGreenBg else Color.Transparent,
+                            contentColor = if (currentStatus == "NORMAL") ColorGreen else ColorText2
+                        ),
+                        border = BorderStroke(1.dp, if (currentStatus == "NORMAL") ColorGreen else ColorBorder),
+                        shape = RoundedCornerShape(10.dp),
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text("Driver: NORMAL", fontSize = 12.sp)
+                    }
+
+                    OutlinedButton(
+                        onClick = { controller.updateDriverStatus("DROWSY") },
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            containerColor = if (currentStatus == "DROWSY") ColorRedBg else Color.Transparent,
+                            contentColor = if (currentStatus == "DROWSY") ColorRed else ColorText2
+                        ),
+                        border = BorderStroke(1.dp, if (currentStatus == "DROWSY") ColorRed else ColorBorder),
+                        shape = RoundedCornerShape(10.dp),
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text("Driver: DROWSY", fontSize = 12.sp)
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // SDK Simulation Toggle
+                val sdkAvailable by viewModel.sarvamEdgeManager.isSdkAvailable.collectAsState()
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text("Sarvam Edge SDK Available", color = ColorText2, fontSize = 13.sp)
+                    Switch(
+                        checked = sdkAvailable,
+                        onCheckedChange = { isAvailable ->
+                            viewModel.sarvamEdgeManager.simulateSdkFailure(!isAvailable)
+                        },
+                        colors = SwitchDefaults.colors(
+                            checkedThumbColor = ColorPurple,
+                            checkedTrackColor = ColorPurpleBg
+                        )
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // Config Panel (Language & Repeat Interval)
+                val config by controller.config.collectAsState()
+                HorizontalDivider(color = ColorBorder)
+                Spacer(modifier = Modifier.height(12.dp))
+                
+                Text("Demo Configurations", fontWeight = FontWeight.Bold, color = ColorText3, fontSize = 12.sp)
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // Language Selectors
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .horizontalScroll(rememberScrollState())
+                ) {
+                    val languages = listOf(
+                        "en-IN", "hi-IN", "bn-IN", "ta-IN", "te-IN",
+                        "kn-IN", "ml-IN", "mr-IN", "gu-IN", "pa-IN", "od-IN"
+                    )
+                    languages.forEach { lang ->
+                        Box(
+                            modifier = Modifier
+                                .width(80.dp)
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(if (config.language == lang) ColorPrimaryBg else ColorBg)
+                                .border(1.dp, if (config.language == lang) ColorPrimary else ColorBorder, RoundedCornerShape(8.dp))
+                                .clickable { controller.updateConfig(config.copy(language = lang)) }
+                                .padding(vertical = 8.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(lang, fontSize = 11.sp, fontWeight = FontWeight.Bold, color = if (config.language == lang) ColorPrimary else ColorText2)
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(10.dp))
+
+                // Repeat Interval
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text("Repeat Interval:", color = ColorText3, fontSize = 12.sp)
+                    val intervals = listOf(5000L to "5s", 15000L to "15s", 30000L to "30s")
+                    Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        intervals.forEach { (ms, label) ->
+                            Box(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(6.dp))
+                                    .background(if (config.repeatIntervalMs == ms) ColorPrimaryBg else ColorBg)
+                                    .clickable { controller.updateConfig(config.copy(repeatIntervalMs = ms)) }
+                                    .padding(horizontal = 10.dp, vertical = 4.dp)
+                            ) {
+                                Text(label, fontSize = 11.sp, fontWeight = FontWeight.Bold, color = if (config.repeatIntervalMs == ms) ColorPrimary else ColorText2)
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         Spacer(Modifier.height(20.dp))

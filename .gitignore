@@ -44,5 +44,15 @@ android-app/server/build/
 android-app/client/build/
 android-app/client/app/build/
 
+# IDE settings
+.idea/
+**/.idea/
+
+# Kotlin / Build logs
+**/.kotlin/
+*.log
+**/gradle-daemon-jvm.properties
+**/.gradle/
+
 # Mac
 .DS_Store

@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -10,11 +12,29 @@ android {
 
     defaultConfig {
         applicationId = "com.think360.bms"
-        minSdk = 26
+        minSdk = 27
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
+
+        // Load local.properties for API keys
+        val localProperties = Properties()
+        val localPropertiesFile = project.rootProject.file("local.properties")
+        if (localPropertiesFile.exists()) {
+            val stream = localPropertiesFile.inputStream()
+            localProperties.load(stream)
+            stream.close()
+        }
+        val apiKey = localProperties.getProperty("sarvam.api.key") ?: "YOUR_SARVAM_API_KEY"
+        buildConfigField("String", "SARVAM_API_KEY", "\"$apiKey\"")
     }
+
+
+    buildFeatures {
+        compose = true
+        buildConfig = true
+    }
+
 
     buildTypes {
         release {
@@ -28,14 +48,14 @@ android {
     kotlinOptions {
         jvmTarget = "11"
     }
-    buildFeatures {
-        compose = true
-    }
-    // Required for ONNX model assets
-    aaptOptions {
-        noCompress += listOf("ort", "onnx")
+
+    packaging {
+        jniLibs {
+            useLegacyPackaging = true
+        }
     }
 }
+
 
 dependencies {
     implementation(libs.androidx.core.ktx)
@@ -65,6 +85,9 @@ dependencies {
     implementation(libs.maps.compose)
     implementation(libs.play.services.maps)
     implementation(libs.play.services.location)
+
+    // Qualcomm GenieX SDK (On-Device LLM Inference)
+    implementation("com.qualcomm.qti:geniex-android:0.3.11")
 
     debugImplementation(libs.androidx.ui.tooling)
 }

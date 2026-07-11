@@ -5,12 +5,23 @@ val exposed_version: String by project
 
 plugins {
     kotlin("jvm") version "1.9.22"
-    id("io.ktor.plugin") version "2.3.8"
+    application
     id("org.jetbrains.kotlin.plugin.serialization") version "1.9.22"
 }
 
 group = "com.think360.server"
 version = "0.0.1"
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+}
+
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
+    kotlinOptions {
+        jvmTarget = "21"
+    }
+}
 
 application {
     mainClass.set("com.think360.server.ApplicationKt")

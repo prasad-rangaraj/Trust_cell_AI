@@ -23,12 +23,29 @@ import androidx.navigation.compose.*
 import com.think360.bms.ui.screens.*
 import com.think360.bms.ui.theme.*
 import com.think360.bms.viewmodel.BmsViewModel
+import com.think360.bms.ui.components.AlertOverlay
+
 
 class MainActivity : ComponentActivity() {
     private val viewModel: BmsViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Request RECORD_AUDIO and POST_NOTIFICATIONS runtime permissions on startup
+        val requestPermissionsLauncher = registerForActivityResult(
+            androidx.activity.result.contract.ActivityResultContracts.RequestMultiplePermissions()
+        ) { permissions ->
+            val audioGranted = permissions[android.Manifest.permission.RECORD_AUDIO] ?: false
+            val notifyGranted = permissions[android.Manifest.permission.POST_NOTIFICATIONS] ?: false
+            android.util.Log.i("MainActivity", "Permissions - Audio: $audioGranted, Notification: $notifyGranted")
+        }
+        val requiredPermissions = mutableListOf(android.Manifest.permission.RECORD_AUDIO)
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            requiredPermissions.add(android.Manifest.permission.POST_NOTIFICATIONS)
+        }
+        requestPermissionsLauncher.launch(requiredPermissions.toTypedArray())
+
         enableEdgeToEdge()
         setContent {
             Think360Theme {
@@ -108,18 +125,31 @@ fun EVGuardianApp(viewModel: BmsViewModel) {
             }
         }
     ) { innerPadding ->
-        NavHost(
-            navController    = navController,
-            startDestination = Tab.Home.route,
-            modifier         = Modifier.padding(bottom = innerPadding.calculateBottomPadding()).fillMaxSize()
-        ) {
-            composable(Tab.Home.route)     { HomeScreen(viewModel, navController) }
-            composable(Tab.Safety.route)   { SafetyScreen(viewModel) }
-            composable(Tab.Charging.route) { ChargingScreen(viewModel) }
-            composable(Tab.Map.route)      { MapScreen(viewModel) }
-            composable(Tab.Settings.route) { SettingsScreen2(viewModel, navController) }
-            composable("profile")          { ProfileScreen(navController) }
-            composable("assistant")        { AssistantScreen(viewModel, navController) }
+        Box(modifier = Modifier.fillMaxSize()) {
+            NavHost(
+                navController    = navController,
+                startDestination = Tab.Home.route,
+                modifier         = Modifier.padding(bottom = innerPadding.calculateBottomPadding()).fillMaxSize()
+            ) {
+                composable(Tab.Home.route)     { HomeScreen(viewModel, navController) }
+                composable(Tab.Safety.route)   { SafetyScreen(viewModel) }
+                composable(Tab.Charging.route) { ChargingScreen(viewModel) }
+                composable(Tab.Map.route)      { MapScreen(viewModel) }
+                composable(Tab.Settings.route) { SettingsScreen2(viewModel, navController) }
+                composable("profile")          { ProfileScreen(navController) }
+                composable("assistant")        { AssistantScreen(viewModel, navController) }
+            }
+
+            // Sarvam Edge Alert Overlay UI
+            AlertOverlay(
+                controller = viewModel.voiceAlertController,
+                sarvamEdgeManager = viewModel.sarvamEdgeManager,
+                onSimulateDriverVoice = { text ->
+                    viewModel.sarvamEdgeManager.sttManager.simulateDriverResponse(text)
+                }
+            )
+
         }
     }
 }
+

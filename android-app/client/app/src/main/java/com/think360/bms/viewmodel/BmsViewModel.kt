@@ -26,10 +26,37 @@ import java.nio.FloatBuffer
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody.Companion.toRequestBody
 
+import com.think360.bms.data.sarvam.*
+
 private const val TAG = "BmsViewModel"
 private const val SERVER_URL = "http://10.70.250.251:3001"  // PC's local IP address on Wi-Fi
 
 class BmsViewModel(application: Application) : AndroidViewModel(application) {
+
+    // Local fallbacks if the Foreground Service is not yet started or bound (e.g. preview)
+    private val fallbackBluetoothManager = BluetoothManager(application, viewModelScope)
+    private val fallbackBluetoothAlertReceiver = BluetoothAlertReceiver(fallbackBluetoothManager, viewModelScope)
+    private val fallbackSarvamEdgeManager = SarvamEdgeManager(application, viewModelScope)
+    private val fallbackVoiceAlertController = VoiceAlertController(application, viewModelScope, fallbackBluetoothAlertReceiver, fallbackSarvamEdgeManager)
+
+    init {
+        // Start driver safety background service immediately on VM startup
+        EVGuardianService.startService(application)
+    }
+
+    // Exposed managers that route to the running Foreground Service singleton instances
+    val bluetoothManager: BluetoothManager
+        get() = EVGuardianService.bluetoothManagerInstance ?: fallbackBluetoothManager
+
+    val bluetoothAlertReceiver: BluetoothAlertReceiver
+        get() = fallbackBluetoothAlertReceiver
+
+    val sarvamEdgeManager: SarvamEdgeManager
+        get() = EVGuardianService.sarvamEdgeManagerInstance ?: fallbackSarvamEdgeManager
+
+    val voiceAlertController: VoiceAlertController
+        get() = EVGuardianService.controllerInstance ?: fallbackVoiceAlertController
+
 
     // ── Live telemetry ────────────────────────────────────────────────────────
     private val _batteryState = MutableStateFlow(BatteryState())

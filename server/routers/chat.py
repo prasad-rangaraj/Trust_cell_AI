@@ -14,7 +14,7 @@ from schemas.bms import ChatRequest, InsightRequest, SpeechToTextRequest
 
 load_dotenv()
 OLLAMA_URL = "http://127.0.0.1:11434/api/chat"
-MODEL = "qwen2.5:7b"
+MODEL = os.getenv("LLM_MODEL", "qwen3:0.6b")
 
 router = APIRouter(prefix="/chat", tags=["chat"])
 
