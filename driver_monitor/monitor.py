@@ -4,6 +4,8 @@ import os
 import urllib.request
 import ssl
 import tempfile
+import json
+import threading
 
 def main():
     print("[INFO] Loading OpenCV Face & Eye Detectors...")
@@ -38,6 +40,7 @@ def main():
     print("[INFO] Camera active. Make sure to click the video window before pressing 'q' to quit.")
     
     eyes_closed_frames = 0
+    last_alert_time = 0
     
     while cap.isOpened():
         success, image = cap.read()
@@ -87,9 +90,30 @@ def main():
         # Flip image for selfie view
         flipped_image = cv2.flip(image, 1)
         
-        # If sleeping, add a massive warning to the screen
+        # If sleeping, add a massive warning to the screen and trigger cloud alert
         if is_sleeping:
             cv2.rectangle(flipped_image, (0, 0), (640, 480), (0, 0, 255), 10)
+            
+            # Send alert to the Cloud Backend (Debounced to every 5 seconds)
+            if time.time() - last_alert_time > 5.0:
+                print("[ALERT] Driver sleeping! Sending alert to cloud backend...")
+                def send_alert():
+                    try:
+                        payload = json.dumps({
+                            "event": "drowsiness_detected",
+                            "driverStatus": "DROWSY",
+                            "confidence": 0.99,
+                            "riskLevel": "HIGH",
+                            "timestamp": int(time.time() * 1000)
+                        }).encode('utf-8')
+                        req = urllib.request.Request("https://ev-guardian.onrender.com/api/alert", data=payload, headers={'Content-Type': 'application/json'})
+                        urllib.request.urlopen(req)
+                    except Exception as e:
+                        print(f"[ERROR] Failed to send cloud alert: {e}")
+                
+                # Run in background thread to avoid lagging the video feed
+                threading.Thread(target=send_alert).start()
+                last_alert_time = time.time()
         
         # Overlay UI text
         cv2.putText(flipped_image, f'FPS: {int(fps)}', (20, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)

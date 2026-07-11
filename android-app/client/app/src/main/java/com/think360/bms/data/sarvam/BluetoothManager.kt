@@ -16,11 +16,17 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.io.InputStream
 import java.util.UUID
+import okhttp3.*
+import okhttp3.WebSocket
+import okhttp3.WebSocketListener
 
 private const val TAG = "BluetoothManager"
 private val MY_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB") // Standard SerialPortService ID
 
 class BluetoothManager(private val context: Context, private val scope: CoroutineScope) {
+
+    private val httpClient = OkHttpClient()
+    private var cloudWebSocket: WebSocket? = null
 
     private val _isConnected = MutableStateFlow(false)
     val isConnected: StateFlow<Boolean> = _isConnected.asStateFlow()
@@ -108,5 +114,28 @@ class BluetoothManager(private val context: Context, private val scope: Coroutin
             Log.d(TAG, "Simulating received Bluetooth packet: $json")
             _rawPackets.emit(json)
         }
+    }
+
+    /**
+     * Start listening to the Cloud Ktor Backend for alerts as a fallback to Bluetooth.
+     */
+    fun startCloudListener(wssUrl: String) {
+        Log.d(TAG, "Connecting to Cloud WebSocket: $wssUrl")
+        val request = Request.Builder().url(wssUrl).build()
+        cloudWebSocket = httpClient.newWebSocket(request, object : WebSocketListener() {
+            override fun onOpen(webSocket: WebSocket, response: Response) {
+                Log.d(TAG, "Cloud WebSocket Connected")
+            }
+
+            override fun onMessage(webSocket: WebSocket, text: String) {
+                Log.d(TAG, "Cloud alert received: $text")
+                // Inject cloud alert directly into the Bluetooth UI flow!
+                scope.launch { _rawPackets.emit(text) }
+            }
+
+            override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
+                Log.e(TAG, "Cloud WebSocket Error: ${t.message}")
+            }
+        })
     }
 }

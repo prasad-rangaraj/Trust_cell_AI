@@ -29,7 +29,7 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import com.think360.bms.data.sarvam.*
 
 private const val TAG = "BmsViewModel"
-private const val SERVER_URL = "http://10.70.250.251:3001"  // PC's local IP address on Wi-Fi
+private const val SERVER_URL = "https://ev-guardian.onrender.com"
 
 class BmsViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -42,6 +42,10 @@ class BmsViewModel(application: Application) : AndroidViewModel(application) {
     init {
         // Start driver safety background service immediately on VM startup
         EVGuardianService.startService(application)
+        
+        // Start listening for cloud alerts on WebSocket
+        val wssUrl = SERVER_URL.replace("http://", "ws://").replace("https://", "wss://") + "/ws/telemetry"
+        fallbackBluetoothManager.startCloudListener(wssUrl)
     }
 
     // Exposed managers that route to the running Foreground Service singleton instances
