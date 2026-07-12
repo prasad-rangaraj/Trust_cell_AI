@@ -92,15 +92,15 @@ graph TD
 
 ---
 
-## 📑 Rubric Mapping Matrix (Quick-Reference for Judges)
+## 📑 Rubric Alignment Index (Quick-Reference for Evaluators)
 
-| Rubric Category | README Section | Coding Proof & Artifact Locations | Points |
-| :--- | :--- | :--- | :--- |
-| **i. Technical Implementation** | [Device 1 (Zephyr RTOS)](#-device-1-arduino-uno-q--edge-sensing--ingestion) & [Device 2 (NPU ONNX/PINN)](#-device-2-snapdragon-x-pc--edge-ai-co-processor) | [`backend.py`](file:///c:/ev%20vechile/backend.py), [`firmware/main.c`](file:///c:/ev%20vechile/ZEPHYR_RTOS_COMPLETE_BLUEPRINT.md#L268-L926) | **40 / 40** |
-| **ii. Application Use-Case & Innovation** | [Innovative Scenarios Blueprint](#💡-innovative-scenarios-blueprint) | [`ev_guardian_flow_problem_statements.md`](file:///c:/ev%20vechile/ev_guardian_flow_problem_statements.md) | **25 / 25** |
-| **iii. Deployment & Accessibility** | [System Setups & Deployments](#🚀-system-setups--deployments) | [`launch.py`](file:///c:/ev%20vechile/launch.py), [`test_integration.py`](file:///c:/ev%20vechile/test_integration.py) | **20 / 20** |
-| **iv. Presentation & Documentation** | [Hardware Schematic & Port Registers Mapping](#📊-hardware-schematic--port-registers-mapping) | [`DEMO_SCRIPT.md`](file:///c:/ev%20vechile/DEMO_SCRIPT.md), [Schematics Section](#📊-hardware-schematic--port-registers-mapping) | **15 / 15** |
-| **v. Multi-Device Orchestration** | [Device 3 (Mobile Spatial AI)](#-device-3-qualcomm-mobile-phone--spatial-ar--diagnostics) & [Device 4 (Cloud Sync)](#-device-4-cloud-ai-fleet-analytics--future-implementations) | [`mobile_sam2_ar_pipeline.dart`](file:///c:/ev%20vechile/mobile_sam2_ar_pipeline.dart), [`mobile_vlm_qnn_pipeline.md`](file:///c:/ev%20vechile/mobile_vlm_qnn_pipeline.md) | **100 / 100** |
+| Evaluation Criteria | Target README Section | Implementation Details & References |
+| :--- | :--- | :--- |
+| **Technical Implementation** | [Device 1 (Zephyr RTOS)](#-device-1-arduino-uno-q--edge-sensing--ingestion) & [Device 2 (NPU ONNX/PINN)](#-device-2-snapdragon-x-pc--edge-ai-co-processor) | [`backend.py`](file:///c:/ev%20vechile/backend.py), [`firmware/main.c`](file:///c:/ev%20vechile/ZEPHYR_RTOS_COMPLETE_BLUEPRINT.md#L268-L926) |
+| **Application Use-Case & Innovation** | [Innovative Scenarios Blueprint](#💡-innovative-scenarios-blueprint) | [`ev_guardian_flow_problem_statements.md`](file:///c:/ev%20vechile/ev_guardian_flow_problem_statements.md) |
+| **Deployment & Accessibility** | [System Setups & Deployments](#🚀-system-setups--deployments) | [`launch.py`](file:///c:/ev%20vechile/launch.py), [`test_integration.py`](file:///c:/ev%20vechile/test_integration.py) |
+| **Presentation & Documentation** | [Hardware Schematic & Port Registers Mapping](#📊-hardware-schematic--port-registers-mapping) | [`DEMO_SCRIPT.md`](file:///c:/ev%20vechile/DEMO_SCRIPT.md), [Schematics Section](#📊-hardware-schematic--port-registers-mapping) |
+| **Multi-Device Orchestration** | [Device 3 (Mobile Spatial AR)](#-device-3-qualcomm-mobile-phone--spatial-ar--diagnostics) & [Device 4 (Cloud Sync)](#-device-4-cloud-ai-fleet-analytics--future-implementations) | [`mobile_sam2_ar_pipeline.dart`](file:///c:/ev%20vechile/mobile_sam2_ar_pipeline.dart), [`mobile_vlm_qnn_pipeline.md`](file:///c:/ev%20vechile/mobile_vlm_qnn_pipeline.md) |
 
 ---
 
@@ -283,7 +283,7 @@ flowchart LR
 
 ---
 
-## 💡 Innovative Scenarios Blueprint (25 Points)
+## 💡 Innovative Scenarios Blueprint
 
 Trust Cell AI addresses critical safety challenges in the EV ecosystem:
 
@@ -295,7 +295,7 @@ Trust Cell AI addresses critical safety challenges in the EV ecosystem:
 
 ---
 
-## 🚀 System Setups & Deployments (20 Points)
+## 🚀 System Setups & Deployments
 
 ### System Prerequisites
 Ensure the following are active:
@@ -330,7 +330,7 @@ python test_integration.py
 
 ---
 
-## 📊 Hardware Schematic & Port Registers Mapping (15 Points)
+## 📊 Hardware Schematic & Port Registers Mapping
 
 ### Hardware Connections & Board Pinouts
 
