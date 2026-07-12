@@ -45,7 +45,7 @@ python -m venv venv
 pip install -r requirements.txt
 
 # Start the Python server
-uvicorn main:app --reload --port 3001
+uvicorn main:socket_app --reload --port 3001
 ```
 
 To run the React Frontend Dashboard:

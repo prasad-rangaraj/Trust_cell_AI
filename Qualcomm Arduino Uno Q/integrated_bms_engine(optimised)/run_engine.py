@@ -41,13 +41,21 @@ def on_message(client, userdata, msg):
         engine.add_row(telemetry_row)
         
         print("[2] Running Inference...")
-        result = engine.predict()
+        inference_output = engine.predict()
         
-        print("[3] AI Diagnostics Result:")
-        pprint.pprint(result)
-
+        print("\n[3] AI Diagnostics Result:")
+        from pprint import pprint
+        pprint(inference_output)
+        
+        # Publish the results back to the MQTT broker so the Web & Mobile backends can consume them
+        try:
+            payload = json.dumps(inference_output)
+            client.publish("ev/diagnostics/prediction", payload)
+        except Exception as e:
+            print(f"[MQTT] Failed to publish diagnostics: {e}")
+            
     except Exception as e:
-        print(f"Error processing MQTT message: {e}")
+        print(f"Error processing telemetry: {e}")
 
 def main():
     global engine

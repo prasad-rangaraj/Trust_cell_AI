@@ -32,7 +32,7 @@ geniex serve --host 127.0.0.1:8080
 **2. Start the Backend:**
 ```bash
 cd server
-uvicorn main:app --reload --port 3001
+uvicorn main:socket_app --reload --port 3001
 ```
 
 **3. Start the Frontend:**

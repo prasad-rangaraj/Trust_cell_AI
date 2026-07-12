@@ -63,8 +63,17 @@ def handle_chat(body: ChatRequest):
             "current": body.contextData.get("current"),
             "mlOp": body.contextData.get("mlOp")
         }
+        try:
+            import shared_state
+            edge_prediction = shared_state.latest_prediction
+            edge_trust = shared_state.latest_trust_score
+        except Exception:
+            edge_prediction = "Unknown"
+            edge_trust = "Unknown"
+            
         full_prompt = (
-            f"[BATTERY CONTEXT]: {json.dumps(vital_stats)}\n\n"
+            f"[BATTERY CONTEXT]: {json.dumps(vital_stats)}\n"
+            f"[EDGE ENGINE PREDICTION]: {edge_prediction} (Trust Score: {edge_trust})\n\n"
             f"[USER]: {body.message}"
         )
         

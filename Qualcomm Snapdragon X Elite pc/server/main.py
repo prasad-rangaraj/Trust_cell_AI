@@ -286,6 +286,12 @@ def _on_mqtt_message(client, userdata, msg):
                 "soh_pct": nested.get("soh_pct", 100.0),
                 "complexity_reason": nested.get("complexity_reason", "")
             }
+            
+            # Save to shared state so mobile/web chat APIs can read it
+            import shared_state
+            shared_state.latest_prediction = prediction_data["prediction"]
+            shared_state.latest_trust_score = prediction_data["overall_trust"]
+            
             # Emit diagnostics to web client
             asyncio.run_coroutine_threadsafe(sio.emit("diagnostics:update", prediction_data), _loop)
         except Exception as e:
