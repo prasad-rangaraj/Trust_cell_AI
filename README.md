@@ -96,14 +96,54 @@ To run the Android app companion:
 
 ---
 
+## 🧠 AI Models & APIs Used
+
+### 1. Local Edge AI (NPU) - GenieX
+The Web Dashboard chatbot is powered by a local, offline LLM running on the Snapdragon NPU using **GenieX**. GenieX is a high-performance edge AI inference engine designed for running LLMs efficiently on consumer hardware.
+
+#### GenieX Installation Process
+To use the local AI features, you must install the GenieX CLI tool:
+1. Download the latest release from the [GenieX GitHub Repository / Official Website](https://github.com/geniex/geniex) or install it via npm:
+   ```bash
+   npm install -g geniex-cli
+   ```
+2. Make sure it is added to your system `PATH` so you can use the `geniex` command globally.
+
+- **LLM Model:** `Qwen/Qwen3-0.6B-Instruct-GGUF:q4_k_m` (Configured in `.env`) 
+- *Note: You can also use the larger `bartowski/Qwen_Qwen2.5-VL-7B-Instruct-GGUF:q4_k_m` if your device has enough RAM.*
+
+To run the inference server:
+```bash
+# This command automatically downloads the GGUF model and loads it into memory
+geniex infer Qwen/Qwen3-0.6B-Instruct-GGUF:q4_k_m
+
+# Starts the local API server mimicking OpenAI format
+geniex serve --host 127.0.0.1:8080
+```
+*(Ensure `.env` is configured with `GENIEX_URL="http://127.0.0.1:8080/v1/chat/completions"` and `AI_MODEL`)*
+
+### 2. Sarvam AI (Voice & Translation APIs)
+The web chat interface utilizes Sarvam AI's cutting-edge APIs for seamless voice interactions and multilingual support:
+- **Speech-To-Text (STT):** `saaras:v3`
+- **Text-To-Speech (TTS):** `bulbul:v3`
+- **Translation:** `mayura:v1`
+
+### 3. Qualcomm AI Hub (Driver Monitor)
+The driver drowsiness monitor runs locally on the edge using optimized Qualcomm models:
+- **FaceDetLite:** Lightweight Face Detection.
+- **FaceAttribNet:** Facial Attribute Detection (detects eye openness and sunglasses).
+
+### 4. Integrated BMS Engine
+The battery telemetry stream is scored locally by the following offline ML models:
+- **LSTM Battery Fault Classifier:** ONNX runtime inference.
+- **Sensor Autoencoder:** ONNX runtime anomaly detection.
+- **Isolation Forest:** Scikit-Learn based anomaly fallback.
+- **XGBoost Classifier:** Used by the Sensor Trust Engine for accuracy supervision.
+---
+
 ## 🏃 Run and Usage Instructions
 
-1. **Start the Edge AI LLM (GenieX):**
-   EV Guardian leverages local NPU AI. Start your local LLM engine:
-   ```bash
-   geniex infer bartowski/Qwen_Qwen2.5-VL-7B-Instruct-GGUF:q4_k_m
-   geniex serve --host 127.0.0.1:8080
-   ```
+1. **Start the Edge AI LLM (GenieX):** (See Step 1 in AI Models section above).
 2. **Start the Web Dashboard Server:** (See Step 1 above).
 3. **Start the BMS Engine:** (See Step 2 above). It will process simulated or real hardware telemetry in real-time.
 4. **Access the Dashboard:** Open `http://localhost:3001` or your React frontend URL in a browser. You can interact with the AI assistant, monitor live cell analytics, and view predictive faults all processed locally on the edge.
