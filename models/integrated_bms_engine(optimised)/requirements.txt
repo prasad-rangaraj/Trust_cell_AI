@@ -1,0 +1,7 @@
+numpy
+pandas
+joblib
+onnxruntime
+xgboost
+scikit-learn
+paho-mqtt

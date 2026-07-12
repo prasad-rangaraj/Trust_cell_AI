@@ -1,0 +1,254 @@
+1<?xml version="1.0" encoding="utf-8"?>
+2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+3    package="com.think360.bms"
+4    android:versionCode="1"
+5    android:versionName="1.0" >
+6
+7    <uses-sdk
+7-->INJECTED
+8        android:minSdkVersion="27"
+8-->INJECTED
+9        android:targetSdkVersion="35" />
+9-->INJECTED
+10
+11    <uses-permission android:name="android.permission.INTERNET" />
+11-->C:\ev_guardian\ev_guardian\android-app\client\app\src\main\AndroidManifest.xml:4:5-67
+11-->C:\ev_guardian\ev_guardian\android-app\client\app\src\main\AndroidManifest.xml:4:22-64
+12    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+12-->C:\ev_guardian\ev_guardian\android-app\client\app\src\main\AndroidManifest.xml:5:5-79
+12-->C:\ev_guardian\ev_guardian\android-app\client\app\src\main\AndroidManifest.xml:5:22-76
+13    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+13-->C:\ev_guardian\ev_guardian\android-app\client\app\src\main\AndroidManifest.xml:6:5-79
+13-->C:\ev_guardian\ev_guardian\android-app\client\app\src\main\AndroidManifest.xml:6:22-76
+14    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+14-->C:\ev_guardian\ev_guardian\android-app\client\app\src\main\AndroidManifest.xml:7:5-81
+14-->C:\ev_guardian\ev_guardian\android-app\client\app\src\main\AndroidManifest.xml:7:22-78
+15    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+15-->C:\ev_guardian\ev_guardian\android-app\client\app\src\main\AndroidManifest.xml:8:5-71
+15-->C:\ev_guardian\ev_guardian\android-app\client\app\src\main\AndroidManifest.xml:8:22-68
+16    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+16-->C:\ev_guardian\ev_guardian\android-app\client\app\src\main\AndroidManifest.xml:9:5-77
+16-->C:\ev_guardian\ev_guardian\android-app\client\app\src\main\AndroidManifest.xml:9:22-74
+17    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
+17-->C:\ev_guardian\ev_guardian\android-app\client\app\src\main\AndroidManifest.xml:10:5-87
+17-->C:\ev_guardian\ev_guardian\android-app\client\app\src\main\AndroidManifest.xml:10:22-84
+18    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+18-->C:\ev_guardian\ev_guardian\android-app\client\app\src\main\AndroidManifest.xml:11:5-77
+18-->C:\ev_guardian\ev_guardian\android-app\client\app\src\main\AndroidManifest.xml:11:22-74
+19
+20    <uses-feature
+20-->[com.google.android.gms:play-services-maps:19.0.0] C:\Users\qcwor\.gradle\caches\9.4.1\transforms\c153a564452ea04bb4f20bdf06357e17\transformed\play-services-maps-19.0.0\AndroidManifest.xml:26:5-28:35
+21        android:glEsVersion="0x00020000"
+21-->[com.google.android.gms:play-services-maps:19.0.0] C:\Users\qcwor\.gradle\caches\9.4.1\transforms\c153a564452ea04bb4f20bdf06357e17\transformed\play-services-maps-19.0.0\AndroidManifest.xml:27:9-41
+22        android:required="true" />
+22-->[com.google.android.gms:play-services-maps:19.0.0] C:\Users\qcwor\.gradle\caches\9.4.1\transforms\c153a564452ea04bb4f20bdf06357e17\transformed\play-services-maps-19.0.0\AndroidManifest.xml:28:9-32
+23
+24    <queries>
+24-->[com.google.android.gms:play-services-maps:19.0.0] C:\Users\qcwor\.gradle\caches\9.4.1\transforms\c153a564452ea04bb4f20bdf06357e17\transformed\play-services-maps-19.0.0\AndroidManifest.xml:30:5-34:15
+25
+26        <!-- Needs to be explicitly declared on Android R+ -->
+27        <package android:name="com.google.android.apps.maps" />
+27-->[com.google.android.gms:play-services-maps:19.0.0] C:\Users\qcwor\.gradle\caches\9.4.1\transforms\c153a564452ea04bb4f20bdf06357e17\transformed\play-services-maps-19.0.0\AndroidManifest.xml:33:9-64
+27-->[com.google.android.gms:play-services-maps:19.0.0] C:\Users\qcwor\.gradle\caches\9.4.1\transforms\c153a564452ea04bb4f20bdf06357e17\transformed\play-services-maps-19.0.0\AndroidManifest.xml:33:18-61
+28    </queries>
+29
+30    <permission
+30-->[androidx.core:core:1.16.0] C:\Users\qcwor\.gradle\caches\9.4.1\transforms\7f2d27cc6c1e7651ceb0b7786f3c4aa6\transformed\core-1.16.0\AndroidManifest.xml:22:5-24:47
+31        android:name="com.think360.bms.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
+31-->[androidx.core:core:1.16.0] C:\Users\qcwor\.gradle\caches\9.4.1\transforms\7f2d27cc6c1e7651ceb0b7786f3c4aa6\transformed\core-1.16.0\AndroidManifest.xml:23:9-81
+32        android:protectionLevel="signature" />
+32-->[androidx.core:core:1.16.0] C:\Users\qcwor\.gradle\caches\9.4.1\transforms\7f2d27cc6c1e7651ceb0b7786f3c4aa6\transformed\core-1.16.0\AndroidManifest.xml:24:9-44
+33
+34    <uses-permission android:name="com.think360.bms.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" />
+34-->[androidx.core:core:1.16.0] C:\Users\qcwor\.gradle\caches\9.4.1\transforms\7f2d27cc6c1e7651ceb0b7786f3c4aa6\transformed\core-1.16.0\AndroidManifest.xml:26:5-97
+34-->[androidx.core:core:1.16.0] C:\Users\qcwor\.gradle\caches\9.4.1\transforms\7f2d27cc6c1e7651ceb0b7786f3c4aa6\transformed\core-1.16.0\AndroidManifest.xml:26:22-94
+35
+36    <application
+36-->C:\ev_guardian\ev_guardian\android-app\client\app\src\main\AndroidManifest.xml:14:5-50:19
+37        android:allowBackup="true"
+37-->C:\ev_guardian\ev_guardian\android-app\client\app\src\main\AndroidManifest.xml:15:9-35
+38        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
+38-->[androidx.core:core:1.16.0] C:\Users\qcwor\.gradle\caches\9.4.1\transforms\7f2d27cc6c1e7651ceb0b7786f3c4aa6\transformed\core-1.16.0\AndroidManifest.xml:28:18-86
+39        android:debuggable="true"
+40        android:extractNativeLibs="true"
+40-->INJECTED
+41        android:icon="@mipmap/ic_launcher"
+41-->C:\ev_guardian\ev_guardian\android-app\client\app\src\main\AndroidManifest.xml:16:9-43
+42        android:label="EV Assistant"
+42-->C:\ev_guardian\ev_guardian\android-app\client\app\src\main\AndroidManifest.xml:18:9-37
+43        android:roundIcon="@mipmap/ic_launcher"
+43-->C:\ev_guardian\ev_guardian\android-app\client\app\src\main\AndroidManifest.xml:17:9-48
+44        android:supportsRtl="true"
+44-->C:\ev_guardian\ev_guardian\android-app\client\app\src\main\AndroidManifest.xml:21:9-35
+45        android:theme="@style/Theme.Think360BMS"
+45-->C:\ev_guardian\ev_guardian\android-app\client\app\src\main\AndroidManifest.xml:19:9-49
+46        android:usesCleartextTraffic="true" >
+46-->C:\ev_guardian\ev_guardian\android-app\client\app\src\main\AndroidManifest.xml:20:9-44
+47        <activity
+47-->C:\ev_guardian\ev_guardian\android-app\client\app\src\main\AndroidManifest.xml:23:9-31:20
+48            android:name="com.think360.bms.MainActivity"
+48-->C:\ev_guardian\ev_guardian\android-app\client\app\src\main\AndroidManifest.xml:24:13-41
+49            android:exported="true"
+49-->C:\ev_guardian\ev_guardian\android-app\client\app\src\main\AndroidManifest.xml:25:13-36
+50            android:windowSoftInputMode="adjustResize" >
+50-->C:\ev_guardian\ev_guardian\android-app\client\app\src\main\AndroidManifest.xml:26:13-55
+51            <intent-filter>
+51-->C:\ev_guardian\ev_guardian\android-app\client\app\src\main\AndroidManifest.xml:27:13-30:29
+52                <action android:name="android.intent.action.MAIN" />
+52-->C:\ev_guardian\ev_guardian\android-app\client\app\src\main\AndroidManifest.xml:28:17-69
+52-->C:\ev_guardian\ev_guardian\android-app\client\app\src\main\AndroidManifest.xml:28:25-66
+53
+54                <category android:name="android.intent.category.LAUNCHER" />
+54-->C:\ev_guardian\ev_guardian\android-app\client\app\src\main\AndroidManifest.xml:29:17-77
+54-->C:\ev_guardian\ev_guardian\android-app\client\app\src\main\AndroidManifest.xml:29:27-74
+55            </intent-filter>
+56        </activity>
+57
+58        <service
+58-->C:\ev_guardian\ev_guardian\android-app\client\app\src\main\AndroidManifest.xml:33:9-36:40
+59            android:name="com.think360.bms.data.sarvam.EVGuardianService"
+59-->C:\ev_guardian\ev_guardian\android-app\client\app\src\main\AndroidManifest.xml:34:13-58
+60            android:exported="false"
+60-->C:\ev_guardian\ev_guardian\android-app\client\app\src\main\AndroidManifest.xml:36:13-37
+61            android:foregroundServiceType="dataSync" />
+61-->C:\ev_guardian\ev_guardian\android-app\client\app\src\main\AndroidManifest.xml:35:13-53
+62
+63        <receiver
+63-->C:\ev_guardian\ev_guardian\android-app\client\app\src\main\AndroidManifest.xml:38:9-44:20
+64            android:name="com.think360.bms.AlertSimulationReceiver"
+64-->C:\ev_guardian\ev_guardian\android-app\client\app\src\main\AndroidManifest.xml:39:13-52
+65            android:exported="true" >
+65-->C:\ev_guardian\ev_guardian\android-app\client\app\src\main\AndroidManifest.xml:40:13-36
+66            <intent-filter>
+66-->C:\ev_guardian\ev_guardian\android-app\client\app\src\main\AndroidManifest.xml:41:13-43:29
+67                <action android:name="com.think360.bms.SIMULATE_ALERT" />
+67-->C:\ev_guardian\ev_guardian\android-app\client\app\src\main\AndroidManifest.xml:42:17-74
+67-->C:\ev_guardian\ev_guardian\android-app\client\app\src\main\AndroidManifest.xml:42:25-71
+68            </intent-filter>
+69        </receiver>
+70
+71        <meta-data
+71-->C:\ev_guardian\ev_guardian\android-app\client\app\src\main\AndroidManifest.xml:46:9-48:71
+72            android:name="com.google.android.geo.API_KEY"
+72-->C:\ev_guardian\ev_guardian\android-app\client\app\src\main\AndroidManifest.xml:47:13-58
+73            android:value="AIzaSyAou3eh3hWAWwsoeVbC5VNx4kv-GKqjBM8" />
+73-->C:\ev_guardian\ev_guardian\android-app\client\app\src\main\AndroidManifest.xml:48:13-68
+74
+75        <!-- Needs to be explicitly declared on P+ -->
+76        <uses-library
+76-->[com.google.android.gms:play-services-maps:19.0.0] C:\Users\qcwor\.gradle\caches\9.4.1\transforms\c153a564452ea04bb4f20bdf06357e17\transformed\play-services-maps-19.0.0\AndroidManifest.xml:39:9-41:40
+77            android:name="org.apache.http.legacy"
+77-->[com.google.android.gms:play-services-maps:19.0.0] C:\Users\qcwor\.gradle\caches\9.4.1\transforms\c153a564452ea04bb4f20bdf06357e17\transformed\play-services-maps-19.0.0\AndroidManifest.xml:40:13-50
+78            android:required="false" />
+78-->[com.google.android.gms:play-services-maps:19.0.0] C:\Users\qcwor\.gradle\caches\9.4.1\transforms\c153a564452ea04bb4f20bdf06357e17\transformed\play-services-maps-19.0.0\AndroidManifest.xml:41:13-37
+79
+80        <activity
+80-->[com.google.android.gms:play-services-base:18.5.0] C:\Users\qcwor\.gradle\caches\9.4.1\transforms\1e56578338c517a458750d21d46df4df\transformed\play-services-base-18.5.0\AndroidManifest.xml:5:9-173
+81            android:name="com.google.android.gms.common.api.GoogleApiActivity"
+81-->[com.google.android.gms:play-services-base:18.5.0] C:\Users\qcwor\.gradle\caches\9.4.1\transforms\1e56578338c517a458750d21d46df4df\transformed\play-services-base-18.5.0\AndroidManifest.xml:5:19-85
+82            android:exported="false"
+82-->[com.google.android.gms:play-services-base:18.5.0] C:\Users\qcwor\.gradle\caches\9.4.1\transforms\1e56578338c517a458750d21d46df4df\transformed\play-services-base-18.5.0\AndroidManifest.xml:5:146-170
+83            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+83-->[com.google.android.gms:play-services-base:18.5.0] C:\Users\qcwor\.gradle\caches\9.4.1\transforms\1e56578338c517a458750d21d46df4df\transformed\play-services-base-18.5.0\AndroidManifest.xml:5:86-145
+84
+85        <meta-data
+85-->[com.google.android.gms:play-services-basement:18.4.0] C:\Users\qcwor\.gradle\caches\9.4.1\transforms\87c146b168d5cd5272522fe352bcf62e\transformed\play-services-basement-18.4.0\AndroidManifest.xml:6:9-122
+86            android:name="com.google.android.gms.version"
+86-->[com.google.android.gms:play-services-basement:18.4.0] C:\Users\qcwor\.gradle\caches\9.4.1\transforms\87c146b168d5cd5272522fe352bcf62e\transformed\play-services-basement-18.4.0\AndroidManifest.xml:6:20-65
+87            android:value="@integer/google_play_services_version" />
+87-->[com.google.android.gms:play-services-basement:18.4.0] C:\Users\qcwor\.gradle\caches\9.4.1\transforms\87c146b168d5cd5272522fe352bcf62e\transformed\play-services-basement-18.4.0\AndroidManifest.xml:6:66-119
+88
+89        <activity
+89-->[androidx.compose.ui:ui-tooling-android:1.7.8] C:\Users\qcwor\.gradle\caches\9.4.1\transforms\9437f6c06e499f5d3b2999df3cf96922\transformed\ui-tooling-release\AndroidManifest.xml:23:9-25:39
+90            android:name="androidx.compose.ui.tooling.PreviewActivity"
+90-->[androidx.compose.ui:ui-tooling-android:1.7.8] C:\Users\qcwor\.gradle\caches\9.4.1\transforms\9437f6c06e499f5d3b2999df3cf96922\transformed\ui-tooling-release\AndroidManifest.xml:24:13-71
+91            android:exported="true" />
+91-->[androidx.compose.ui:ui-tooling-android:1.7.8] C:\Users\qcwor\.gradle\caches\9.4.1\transforms\9437f6c06e499f5d3b2999df3cf96922\transformed\ui-tooling-release\AndroidManifest.xml:25:13-36
+92
+93        <provider
+93-->[androidx.emoji2:emoji2:1.3.0] C:\Users\qcwor\.gradle\caches\9.4.1\transforms\f18d130696b687e1a130c6e8d7e96721\transformed\emoji2-1.3.0\AndroidManifest.xml:24:9-32:20
+94            android:name="androidx.startup.InitializationProvider"
+94-->[androidx.emoji2:emoji2:1.3.0] C:\Users\qcwor\.gradle\caches\9.4.1\transforms\f18d130696b687e1a130c6e8d7e96721\transformed\emoji2-1.3.0\AndroidManifest.xml:25:13-67
+95            android:authorities="com.think360.bms.androidx-startup"
+95-->[androidx.emoji2:emoji2:1.3.0] C:\Users\qcwor\.gradle\caches\9.4.1\transforms\f18d130696b687e1a130c6e8d7e96721\transformed\emoji2-1.3.0\AndroidManifest.xml:26:13-68
+96            android:exported="false" >
+96-->[androidx.emoji2:emoji2:1.3.0] C:\Users\qcwor\.gradle\caches\9.4.1\transforms\f18d130696b687e1a130c6e8d7e96721\transformed\emoji2-1.3.0\AndroidManifest.xml:27:13-37
+97            <meta-data
+97-->[androidx.emoji2:emoji2:1.3.0] C:\Users\qcwor\.gradle\caches\9.4.1\transforms\f18d130696b687e1a130c6e8d7e96721\transformed\emoji2-1.3.0\AndroidManifest.xml:29:13-31:52
+98                android:name="androidx.emoji2.text.EmojiCompatInitializer"
+98-->[androidx.emoji2:emoji2:1.3.0] C:\Users\qcwor\.gradle\caches\9.4.1\transforms\f18d130696b687e1a130c6e8d7e96721\transformed\emoji2-1.3.0\AndroidManifest.xml:30:17-75
+99                android:value="androidx.startup" />
+99-->[androidx.emoji2:emoji2:1.3.0] C:\Users\qcwor\.gradle\caches\9.4.1\transforms\f18d130696b687e1a130c6e8d7e96721\transformed\emoji2-1.3.0\AndroidManifest.xml:31:17-49
+100            <meta-data
+100-->[androidx.lifecycle:lifecycle-process:2.9.1] C:\Users\qcwor\.gradle\caches\9.4.1\transforms\4d9f15324a7af7dd47951b159d5ff5a2\transformed\lifecycle-process-2.9.1\AndroidManifest.xml:29:13-31:52
+101                android:name="androidx.lifecycle.ProcessLifecycleInitializer"
+101-->[androidx.lifecycle:lifecycle-process:2.9.1] C:\Users\qcwor\.gradle\caches\9.4.1\transforms\4d9f15324a7af7dd47951b159d5ff5a2\transformed\lifecycle-process-2.9.1\AndroidManifest.xml:30:17-78
+102                android:value="androidx.startup" />
+102-->[androidx.lifecycle:lifecycle-process:2.9.1] C:\Users\qcwor\.gradle\caches\9.4.1\transforms\4d9f15324a7af7dd47951b159d5ff5a2\transformed\lifecycle-process-2.9.1\AndroidManifest.xml:31:17-49
+103            <meta-data
+103-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\qcwor\.gradle\caches\9.4.1\transforms\9581d4662b8a4ee61efd14d44bac1f87\transformed\profileinstaller-1.4.0\AndroidManifest.xml:29:13-31:52
+104                android:name="androidx.profileinstaller.ProfileInstallerInitializer"
+104-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\qcwor\.gradle\caches\9.4.1\transforms\9581d4662b8a4ee61efd14d44bac1f87\transformed\profileinstaller-1.4.0\AndroidManifest.xml:30:17-85
+105                android:value="androidx.startup" />
+105-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\qcwor\.gradle\caches\9.4.1\transforms\9581d4662b8a4ee61efd14d44bac1f87\transformed\profileinstaller-1.4.0\AndroidManifest.xml:31:17-49
+106        </provider>
+107
+108        <receiver
+108-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\qcwor\.gradle\caches\9.4.1\transforms\9581d4662b8a4ee61efd14d44bac1f87\transformed\profileinstaller-1.4.0\AndroidManifest.xml:34:9-52:20
+109            android:name="androidx.profileinstaller.ProfileInstallReceiver"
+109-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\qcwor\.gradle\caches\9.4.1\transforms\9581d4662b8a4ee61efd14d44bac1f87\transformed\profileinstaller-1.4.0\AndroidManifest.xml:35:13-76
+110            android:directBootAware="false"
+110-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\qcwor\.gradle\caches\9.4.1\transforms\9581d4662b8a4ee61efd14d44bac1f87\transformed\profileinstaller-1.4.0\AndroidManifest.xml:36:13-44
+111            android:enabled="true"
+111-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\qcwor\.gradle\caches\9.4.1\transforms\9581d4662b8a4ee61efd14d44bac1f87\transformed\profileinstaller-1.4.0\AndroidManifest.xml:37:13-35
+112            android:exported="true"
+112-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\qcwor\.gradle\caches\9.4.1\transforms\9581d4662b8a4ee61efd14d44bac1f87\transformed\profileinstaller-1.4.0\AndroidManifest.xml:38:13-36
+113            android:permission="android.permission.DUMP" >
+113-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\qcwor\.gradle\caches\9.4.1\transforms\9581d4662b8a4ee61efd14d44bac1f87\transformed\profileinstaller-1.4.0\AndroidManifest.xml:39:13-57
+114            <intent-filter>
+114-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\qcwor\.gradle\caches\9.4.1\transforms\9581d4662b8a4ee61efd14d44bac1f87\transformed\profileinstaller-1.4.0\AndroidManifest.xml:40:13-42:29
+115                <action android:name="androidx.profileinstaller.action.INSTALL_PROFILE" />
+115-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\qcwor\.gradle\caches\9.4.1\transforms\9581d4662b8a4ee61efd14d44bac1f87\transformed\profileinstaller-1.4.0\AndroidManifest.xml:41:17-91
+115-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\qcwor\.gradle\caches\9.4.1\transforms\9581d4662b8a4ee61efd14d44bac1f87\transformed\profileinstaller-1.4.0\AndroidManifest.xml:41:25-88
+116            </intent-filter>
+117            <intent-filter>
+117-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\qcwor\.gradle\caches\9.4.1\transforms\9581d4662b8a4ee61efd14d44bac1f87\transformed\profileinstaller-1.4.0\AndroidManifest.xml:43:13-45:29
+118                <action android:name="androidx.profileinstaller.action.SKIP_FILE" />
+118-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\qcwor\.gradle\caches\9.4.1\transforms\9581d4662b8a4ee61efd14d44bac1f87\transformed\profileinstaller-1.4.0\AndroidManifest.xml:44:17-85
+118-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\qcwor\.gradle\caches\9.4.1\transforms\9581d4662b8a4ee61efd14d44bac1f87\transformed\profileinstaller-1.4.0\AndroidManifest.xml:44:25-82
+119            </intent-filter>
+120            <intent-filter>
+120-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\qcwor\.gradle\caches\9.4.1\transforms\9581d4662b8a4ee61efd14d44bac1f87\transformed\profileinstaller-1.4.0\AndroidManifest.xml:46:13-48:29
+121                <action android:name="androidx.profileinstaller.action.SAVE_PROFILE" />
+121-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\qcwor\.gradle\caches\9.4.1\transforms\9581d4662b8a4ee61efd14d44bac1f87\transformed\profileinstaller-1.4.0\AndroidManifest.xml:47:17-88
+121-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\qcwor\.gradle\caches\9.4.1\transforms\9581d4662b8a4ee61efd14d44bac1f87\transformed\profileinstaller-1.4.0\AndroidManifest.xml:47:25-85
+122            </intent-filter>
+123            <intent-filter>
+123-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\qcwor\.gradle\caches\9.4.1\transforms\9581d4662b8a4ee61efd14d44bac1f87\transformed\profileinstaller-1.4.0\AndroidManifest.xml:49:13-51:29
+124                <action android:name="androidx.profileinstaller.action.BENCHMARK_OPERATION" />
+124-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\qcwor\.gradle\caches\9.4.1\transforms\9581d4662b8a4ee61efd14d44bac1f87\transformed\profileinstaller-1.4.0\AndroidManifest.xml:50:17-95
+124-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\qcwor\.gradle\caches\9.4.1\transforms\9581d4662b8a4ee61efd14d44bac1f87\transformed\profileinstaller-1.4.0\AndroidManifest.xml:50:25-92
+125            </intent-filter>
+126        </receiver>
+127
+128        <uses-native-library
+128-->[com.qualcomm.qti:geniex-android:0.3.11] C:\Users\qcwor\.gradle\caches\9.4.1\transforms\620bb5b5bfee5553cac51efe765a68e2\transformed\geniex-android-0.3.11\AndroidManifest.xml:8:9-10:40
+129            android:name="libadsprpc.so"
+129-->[com.qualcomm.qti:geniex-android:0.3.11] C:\Users\qcwor\.gradle\caches\9.4.1\transforms\620bb5b5bfee5553cac51efe765a68e2\transformed\geniex-android-0.3.11\AndroidManifest.xml:9:13-41
+130            android:required="false" />
+130-->[com.qualcomm.qti:geniex-android:0.3.11] C:\Users\qcwor\.gradle\caches\9.4.1\transforms\620bb5b5bfee5553cac51efe765a68e2\transformed\geniex-android-0.3.11\AndroidManifest.xml:10:13-37
+131        <uses-native-library
+131-->[com.qualcomm.qti:geniex-android:0.3.11] C:\Users\qcwor\.gradle\caches\9.4.1\transforms\620bb5b5bfee5553cac51efe765a68e2\transformed\geniex-android-0.3.11\AndroidManifest.xml:8:9-10:40
+132            android:name="libcdsprpc.so"
+132-->[com.qualcomm.qti:geniex-android:0.3.11] C:\Users\qcwor\.gradle\caches\9.4.1\transforms\620bb5b5bfee5553cac51efe765a68e2\transformed\geniex-android-0.3.11\AndroidManifest.xml:9:13-41
+133            android:required="false" />
+133-->[com.qualcomm.qti:geniex-android:0.3.11] C:\Users\qcwor\.gradle\caches\9.4.1\transforms\620bb5b5bfee5553cac51efe765a68e2\transformed\geniex-android-0.3.11\AndroidManifest.xml:10:13-37
+134        <uses-native-library
+134-->[com.qualcomm.qti:geniex-android:0.3.11] C:\Users\qcwor\.gradle\caches\9.4.1\transforms\620bb5b5bfee5553cac51efe765a68e2\transformed\geniex-android-0.3.11\AndroidManifest.xml:8:9-10:40
+135            android:name="libOpenCL.so"
+135-->[com.qualcomm.qti:geniex-android:0.3.11] C:\Users\qcwor\.gradle\caches\9.4.1\transforms\620bb5b5bfee5553cac51efe765a68e2\transformed\geniex-android-0.3.11\AndroidManifest.xml:9:13-41
+136            android:required="false" />
+136-->[com.qualcomm.qti:geniex-android:0.3.11] C:\Users\qcwor\.gradle\caches\9.4.1\transforms\620bb5b5bfee5553cac51efe765a68e2\transformed\geniex-android-0.3.11\AndroidManifest.xml:10:13-37
+137    </application>
+138
+139</manifest>

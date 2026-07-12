@@ -1,0 +1,10 @@
+fastapi
+uvicorn[standard]
+python-socketio
+paho-mqtt==2.1.0
+sqlalchemy
+psycopg[binary]
+pydantic
+pydantic-settings
+google-genai
+python-dotenv

@@ -11,6 +11,13 @@ ENV/
 env.bak/
 venv.bak/
 
+# Node & Frontend
+node_modules/
+dist/
+.next/
+.nuxt/
+
+
 # Android / Kotlin / Gradle
 *.iml
 .gradle
