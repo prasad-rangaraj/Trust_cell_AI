@@ -130,8 +130,8 @@ def main():
                             "riskLevel": "HIGH",
                             "timestamp": int(time.time() * 1000)
                         }).encode('utf-8')
-                        # req1 = urllib.request.Request("http://127.0.0.1:3001/api/alert", data=payload, headers={'Content-Type': 'application/json'})
-                        # urllib.request.urlopen(req1)
+                        req1 = urllib.request.Request("http://127.0.0.1:3001/api/alert", data=payload, headers={'Content-Type': 'application/json'})
+                        urllib.request.urlopen(req1)
                         req2 = urllib.request.Request("https://ev-guardian.onrender.com/api/alert", data=payload, headers={'Content-Type': 'application/json'})
                         urllib.request.urlopen(req2)
                     except Exception as e:

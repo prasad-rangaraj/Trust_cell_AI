@@ -29,7 +29,7 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import com.think360.bms.data.sarvam.*
 
 private const val TAG = "BmsViewModel"
-private const val SERVER_URL = "https://ev-guardian.onrender.com"
+private const val SERVER_URL = "http://10.91.41.58:3001"
 
 class BmsViewModel(application: Application) : AndroidViewModel(application) {
 
