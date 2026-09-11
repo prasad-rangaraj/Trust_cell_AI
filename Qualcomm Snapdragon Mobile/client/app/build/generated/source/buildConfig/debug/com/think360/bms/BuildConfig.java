@@ -10,5 +10,5 @@ public final class BuildConfig {
   public static final int VERSION_CODE = 1;
   public static final String VERSION_NAME = "1.0";
   // Field from default config.
-  public static final String SARVAM_API_KEY = "sk_68jx5rsg_fRg6Dx4W6CeULmgXLJN4FQIH";
+  public static final String SARVAM_API_KEY = "YOUR_SARVAM_API_KEY";
 }
